@@ -28,16 +28,13 @@ export default function LoginAdmin() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-green-950 px-4 py-10">
-
+    <main className="flex min-h-screen items-center justify-center bg-[#173690] px-4 py-10">
       <div className="w-full max-w-md">
 
         {/* LOGO */}
         <div className="mb-8 text-center">
-
           <a href="/" className="inline-flex items-center gap-3">
-
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-yellow-400 text-xl font-extrabold text-green-950">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#36b970] text-xl font-extrabold text-white">
               PG
             </div>
 
@@ -46,32 +43,27 @@ export default function LoginAdmin() {
                 Posto Gasparin
               </h1>
 
-              <p className="text-sm text-green-200">
+              <p className="text-sm text-white/80">
                 Área Administrativa
               </p>
             </div>
-
           </a>
-
         </div>
 
         {/* CARD */}
         <div className="rounded-3xl bg-white p-7 shadow-2xl sm:p-9">
-
           <div className="text-center">
-
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-3xl">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#36b970]/10 text-3xl">
               🔐
             </div>
 
-            <h2 className="mt-5 text-2xl font-extrabold text-gray-900">
+            <h2 className="mt-5 text-2xl font-extrabold text-[#173690]">
               Acesso administrativo
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-gray-500">
               Entre com suas credenciais para acessar o painel.
             </p>
-
           </div>
 
           {/* ERRO */}
@@ -83,7 +75,6 @@ export default function LoginAdmin() {
 
           {/* FORM */}
           <form onSubmit={handleSubmit} className="mt-7 space-y-5">
-
             <div>
               <label
                 htmlFor="email"
@@ -98,7 +89,7 @@ export default function LoginAdmin() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="Digite seu e-mail"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
               />
             </div>
 
@@ -116,38 +107,32 @@ export default function LoginAdmin() {
                 value={senha}
                 onChange={(event) => setSenha(event.target.value)}
                 placeholder="Digite sua senha"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-green-700 px-5 py-3.5 font-bold text-white transition hover:bg-green-800"
+              className="w-full rounded-xl bg-[#173690] px-5 py-3.5 font-bold text-white transition hover:bg-[#36b970]"
             >
               Entrar no painel
             </button>
-
           </form>
 
           <div className="mt-6 border-t border-gray-100 pt-5 text-center">
-
             <a
               href="/"
-              className="text-sm font-semibold text-green-700 hover:text-green-800"
+              className="text-sm font-semibold text-[#36b970] hover:text-[#173690]"
             >
               ← Voltar para o site
             </a>
-
           </div>
-
         </div>
 
-        <p className="mt-6 text-center text-xs text-green-300">
+        <p className="mt-6 text-center text-xs text-white/70">
           Área restrita aos funcionários autorizados.
         </p>
-
       </div>
-
     </main>
   );
 }

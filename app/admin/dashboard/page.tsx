@@ -41,17 +41,15 @@ export default function AdminDashboard() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-
       {/* HEADER */}
-      <header className="bg-green-950 text-white shadow-lg">
+      <header className="bg-[#173690] text-white shadow-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-
           <div>
             <h1 className="text-2xl font-bold">
               Posto Gasparin
             </h1>
 
-            <p className="text-sm text-green-200">
+            <p className="text-sm text-white/80">
               Painel Administrativo
             </p>
           </div>
@@ -60,7 +58,7 @@ export default function AdminDashboard() {
           <nav className="hidden items-center gap-6 md:flex">
             <Link
               href="/"
-              className="text-sm font-medium hover:text-yellow-300"
+              className="text-sm font-medium hover:text-[#36b970]"
             >
               Ver site
             </Link>
@@ -69,7 +67,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 window.location.href = "/admin/login";
               }}
-              className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-green-950 hover:bg-yellow-300"
+              className="rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white hover:bg-[#2fa864]"
             >
               Sair
             </button>
@@ -85,11 +83,11 @@ export default function AdminDashboard() {
         </div>
 
         {menuAberto && (
-          <div className="border-t border-green-800 px-6 py-4 md:hidden">
+          <div className="border-t border-white/20 px-6 py-4 md:hidden">
             <div className="flex flex-col gap-4">
               <Link
                 href="/"
-                className="text-sm font-medium"
+                className="text-sm font-medium hover:text-[#36b970]"
               >
                 Ver site
               </Link>
@@ -98,7 +96,7 @@ export default function AdminDashboard() {
                 onClick={() => {
                   window.location.href = "/admin/login";
                 }}
-                className="w-full rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-green-950"
+                className="w-full rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white hover:bg-[#2fa864]"
               >
                 Sair
               </button>
@@ -109,14 +107,13 @@ export default function AdminDashboard() {
 
       {/* CONTEÚDO */}
       <section className="mx-auto max-w-7xl px-6 py-10">
-
         {/* TÍTULO */}
         <div className="mb-10">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-green-700">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[#36b970]">
             Administração
           </p>
 
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-[#173690]">
             Dashboard
           </h2>
 
@@ -127,18 +124,18 @@ export default function AdminDashboard() {
         </div>
 
         {/* AVISO */}
-        <div className="mb-8 rounded-xl border border-yellow-300 bg-yellow-50 p-5">
+        <div className="mb-8 rounded-xl border border-[#36b970]/30 bg-[#36b970]/10 p-5">
           <div className="flex gap-4">
             <div className="text-2xl">
               💡
             </div>
 
             <div>
-              <h3 className="font-bold text-yellow-900">
+              <h3 className="font-bold text-[#173690]">
                 Área administrativa
               </h3>
 
-              <p className="mt-1 text-sm text-yellow-800">
+              <p className="mt-1 text-sm text-gray-700">
                 Aqui os funcionários poderão atualizar as informações
                 do site sem precisar alterar o código da aplicação.
               </p>
@@ -148,18 +145,17 @@ export default function AdminDashboard() {
 
         {/* MÓDULOS */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
           {modulos.map((modulo) => (
             <Link
               key={modulo.titulo}
               href={modulo.link}
               className="group rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-green-100 text-3xl">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-[#36b970]/10 text-3xl">
                 {modulo.icone}
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-800">
+              <h3 className="text-xl font-bold text-[#173690] group-hover:text-[#36b970]">
                 {modulo.titulo}
               </h3>
 
@@ -167,29 +163,26 @@ export default function AdminDashboard() {
                 {modulo.descricao}
               </p>
 
-              <div className="mt-5 font-semibold text-green-700">
+              <div className="mt-5 font-semibold text-[#36b970]">
                 Gerenciar →
               </div>
             </Link>
           ))}
-
         </div>
 
         {/* STATUS */}
         <div className="mt-10 rounded-2xl bg-white p-6 shadow-sm">
-
-          <h3 className="text-xl font-bold text-gray-900">
+          <h3 className="text-xl font-bold text-[#173690]">
             Status do sistema
           </h3>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
             <div className="rounded-xl bg-gray-50 p-5">
               <p className="text-sm text-gray-500">
                 Site público
               </p>
 
-              <p className="mt-2 font-bold text-green-700">
+              <p className="mt-2 font-bold text-[#36b970]">
                 ● Online
               </p>
             </div>
@@ -199,7 +192,7 @@ export default function AdminDashboard() {
                 Área administrativa
               </p>
 
-              <p className="mt-2 font-bold text-green-700">
+              <p className="mt-2 font-bold text-[#36b970]">
                 ● Ativa
               </p>
             </div>
@@ -209,27 +202,24 @@ export default function AdminDashboard() {
                 Banco de dados
               </p>
 
-              <p className="mt-2 font-bold text-yellow-600">
+              <p className="mt-2 font-bold text-[#173690]">
                 ● Em configuração
               </p>
             </div>
-
           </div>
         </div>
-
       </section>
 
       {/* FOOTER */}
-      <footer className="mt-10 bg-green-950 px-6 py-8 text-center text-sm text-green-200">
+      <footer className="mt-10 bg-[#173690] px-6 py-8 text-center text-sm text-white/80">
         <p>
           Painel Administrativo — Posto Gasparin
         </p>
 
-        <p className="mt-1 text-green-400">
+        <p className="mt-1 text-[#36b970]">
           Sistema de gerenciamento de conteúdo
         </p>
       </footer>
-
     </main>
   );
 }
