@@ -12,205 +12,141 @@ export default function Contato() {
 
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
 
-
-
           <a href="/" className="flex items-center gap-3">
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#36b970] text-xl font-bold text-[#36b970]">
-
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#36b970] text-xl font-bold text-white">
               PG
-
             </div>
 
-
-
             <div>
-
-              <h1 className="text-lg font-extrabold leading-tight text-[#2f9f63]">
-
+              <h1 className="text-lg font-extrabold leading-tight text-[#173690]">
                 Posto Gasparin
-
               </h1>
 
               <p className="text-xs text-gray-500">
-
                 Parada, praticidade e atendimento
-
               </p>
-
             </div>
 
           </a>
 
-
-
-          {/** MENU DESKTOP */}
-
           <nav className="hidden items-center gap-7 md:flex">
 
-            <a href="/" className="font-medium text-gray-700 hover:text-[#36b970]">
-
+            <a
+              href="/"
+              className="font-medium text-gray-700 transition hover:text-[#36b970]"
+            >
               Início
-
             </a>
 
-
-
-            <a href="/o-posto" className="font-medium text-gray-700 hover:text-[#36b970]">
-
+            <a
+              href="/o-posto"
+              className="font-medium text-gray-700 transition hover:text-[#36b970]"
+            >
               O Posto
-
             </a>
 
-
-
-            <a href="/servicos" className="font-medium text-gray-700 hover:text-[#36b970]">
-
+            <a
+              href="/servicos"
+              className="font-medium text-gray-700 transition hover:text-[#36b970]"
+            >
               Serviços
-
             </a>
 
-
-
-            <a href="/galeria" className="font-medium text-gray-700 hover:text-[#36b970]">
-
+            <a
+              href="/galeria"
+              className="font-medium text-gray-700 transition hover:text-[#36b970]"
+            >
               Galeria
-
             </a>
 
-
-
-            <a href="/promocoes" className="font-medium text-gray-700 hover:text-[#36b970]">
-
+            <a
+              href="/promocoes"
+              className="font-medium text-gray-700 transition hover:text-[#36b970]"
+            >
               Promoções
-
             </a>
 
-
-
             <a
-
               href="/contato"
-
-              className="font-medium text-gray-700 hover:text-[#36b970]"
-
+              className="font-bold text-[#36b970]"
             >
-
               Contato
-
             </a>
 
             <a
-
               href="/admin/login"
-
-              className="rounded-lg bg-[#36b970] px-5 py-3 font-bold text-[#10265f] transition hover:bg-[#4dcd88]"
-
+              className="rounded-lg bg-[#36b970] px-5 py-3 font-bold text-[#173690] transition hover:bg-[#36b970]"
             >
-
               Login
-
             </a>
-
-
 
           </nav>
-
-
-
-          {/** MENU MOBILE */}
 
           <details className="relative md:hidden">
 
             <summary className="cursor-pointer list-none rounded-lg bg-[#36b970] px-4 py-2 text-xl text-white">
-
               ☰
-
             </summary>
-
-
 
             <div className="absolute right-0 top-14 w-56 rounded-xl border border-gray-200 bg-white p-3 shadow-xl">
 
               <nav className="flex flex-col">
 
-
-
-                <a href="/" className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100">
-
-                  Início
-
-                </a>
-
-
-
-                <a href="/o-posto" className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100">
-
-                  O Posto
-
-                </a>
-
-
-
-                <a href="/servicos" className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100">
-
-                  Serviços
-
-                </a>
-
-
-
-                <a href="/galeria" className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100">
-
-                  Galeria
-
-                </a>
-
-
-
-                <a href="/promocoes" className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100">
-
-                  Promoções
-
-                </a>
-
-
-
                 <a
-
-                  href="/contato"
-
+                  href="/"
                   className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100"
-
                 >
-
-                  Contato
-
+                  Início
                 </a>
-
-
 
                 <a
-
-                  href="/admin/login"
-
-                  className="rounded-lg bg-[#36b970] px-5 py-3 font-bold text-[#10265f] transition hover:bg-[#4dcd88]"
-
+                  href="/o-posto"
+                  className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100"
                 >
-
-                  Login
-
+                  O Posto
                 </a>
 
+                <a
+                  href="/servicos"
+                  className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100"
+                >
+                  Serviços
+                </a>
 
+                <a
+                  href="/galeria"
+                  className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100"
+                >
+                  Galeria
+                </a>
+
+                <a
+                  href="/promocoes"
+                  className="rounded-lg px-4 py-3 text-gray-700 hover:bg-gray-100"
+                >
+                  Promoções
+                </a>
+
+                <a
+                  href="/contato"
+                  className="rounded-lg bg-[#36b970]/10 px-4 py-3 font-semibold text-[#36b970]"
+                >
+                  Contato
+                </a>
+
+                <a
+                  href="/admin/login"
+                  className="rounded-lg bg-[#36b970] px-5 py-3 font-bold text-[#173690] transition hover:bg-[#36b970]"
+                >
+                  Login
+                </a>
 
               </nav>
 
             </div>
 
           </details>
-
-
 
         </div>
 
@@ -222,7 +158,7 @@ export default function Contato() {
 
       <section className="relative overflow-hidden bg-[#173690]">
 
-        <div className="absolute inset-0 bg-gradient-to-r from-[#10265f] via-[#173690] to-[#2f9f63]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#173690] to-[#36b970]" />
 
 
 
