@@ -1,12 +1,8 @@
 "use client";
 
-
-
 import { FormEvent, useState } from "react";
 
 import Link from "next/link";
-
-
 
 type Servico = {
 
@@ -17,8 +13,6 @@ type Servico = {
   descricao: string;
 
 };
-
-
 
 export default function AdminServicos() {
 
@@ -56,8 +50,6 @@ export default function AdminServicos() {
 
   ]);
 
-
-
   const [nome, setNome] = useState("");
 
   const [descricao, setDescricao] = useState("");
@@ -65,8 +57,6 @@ export default function AdminServicos() {
   const [editandoId, setEditandoId] = useState<number | null>(null);
 
   const [mensagem, setMensagem] = useState("");
-
-
 
   function limparFormulario() {
 
@@ -78,13 +68,9 @@ export default function AdminServicos() {
 
   }
 
-
-
   function salvarServico(event: FormEvent) {
 
     event.preventDefault();
-
-
 
     if (!nome.trim() || !descricao.trim()) {
 
@@ -93,8 +79,6 @@ export default function AdminServicos() {
       return;
 
     }
-
-
 
     if (editandoId !== null) {
 
@@ -120,8 +104,6 @@ export default function AdminServicos() {
 
       );
 
-
-
       setMensagem("Serviço atualizado com sucesso!");
 
     } else {
@@ -136,8 +118,6 @@ export default function AdminServicos() {
 
       };
 
-
-
       setServicos((servicosAtuais) => [
 
         ...servicosAtuais,
@@ -146,17 +126,11 @@ export default function AdminServicos() {
 
       ]);
 
-
-
       setMensagem("Serviço cadastrado com sucesso!");
 
     }
 
-
-
     limparFormulario();
-
-
 
     setTimeout(() => {
 
@@ -166,8 +140,6 @@ export default function AdminServicos() {
 
   }
 
-
-
   function editarServico(servico: Servico) {
 
     setNome(servico.nome);
@@ -175,8 +147,6 @@ export default function AdminServicos() {
     setDescricao(servico.descricao);
 
     setEditandoId(servico.id);
-
-
 
     window.scrollTo({
 
@@ -188,8 +158,6 @@ export default function AdminServicos() {
 
   }
 
-
-
   function excluirServico(id: number) {
 
     const confirmar = window.confirm(
@@ -198,15 +166,11 @@ export default function AdminServicos() {
 
     );
 
-
-
     if (!confirmar) {
 
       return;
 
     }
-
-
 
     setServicos((servicosAtuais) =>
 
@@ -214,11 +178,7 @@ export default function AdminServicos() {
 
     );
 
-
-
     setMensagem("Serviço excluído com sucesso!");
-
-
 
     setTimeout(() => {
 
@@ -228,21 +188,15 @@ export default function AdminServicos() {
 
   }
 
-
-
   return (
 
     <main className="min-h-screen bg-gray-100">
 
-
-
-      {/** HEADER **/}
+      {/* HEADER */}
 
       <header className="bg-[#173690] text-white shadow-lg">
 
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-
-
 
           <div>
 
@@ -252,8 +206,6 @@ export default function AdminServicos() {
 
             </h1>
 
-
-
             <p className="text-sm text-white/80">
 
               Painel Administrativo
@@ -262,11 +214,7 @@ export default function AdminServicos() {
 
           </div>
 
-
-
           <div className="flex items-center gap-3">
-
-
 
             <Link
 
@@ -280,8 +228,6 @@ export default function AdminServicos() {
 
             </Link>
 
-
-
             <Link
 
               href="/"
@@ -294,29 +240,19 @@ export default function AdminServicos() {
 
             </Link>
 
-
-
           </div>
-
-
 
         </div>
 
       </header>
 
-
-
-      {/** CONTEÚDO **/}
+      {/* CONTEÚDO */}
 
       <section className="mx-auto max-w-6xl px-6 py-10">
 
-
-
-        {/** TÍTULO **/}
+        {/* TÍTULO */}
 
         <div className="mb-8">
-
-
 
           <p className="text-sm font-semibold uppercase tracking-wide text-[#36b970]">
 
@@ -324,15 +260,11 @@ export default function AdminServicos() {
 
           </p>
 
-
-
           <h2 className="mt-2 text-3xl font-bold text-[#173690]">
 
             Serviços
 
           </h2>
-
-
 
           <p className="mt-2 text-gray-600">
 
@@ -342,13 +274,9 @@ export default function AdminServicos() {
 
           </p>
 
-
-
         </div>
 
-
-
-        {/** MENSAGEM **/}
+        {/* MENSAGEM */}
 
         {mensagem && (
 
@@ -356,15 +284,11 @@ export default function AdminServicos() {
 
             <div className="flex items-center gap-3">
 
-
-
               <span className="text-xl">
 
                 {mensagem.includes("Preencha") ? "⚠️" : "✅"}
 
               </span>
-
-
 
               <p className="font-semibold">
 
@@ -372,25 +296,17 @@ export default function AdminServicos() {
 
               </p>
 
-
-
             </div>
 
           </div>
 
         )}
 
-
-
-        {/** FORMULÁRIO **/}
+        {/* FORMULÁRIO */}
 
         <section className="mb-10 rounded-2xl bg-white p-6 shadow-sm">
 
-
-
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-
-
 
             <div>
 
@@ -404,8 +320,6 @@ export default function AdminServicos() {
 
               </h3>
 
-
-
               <p className="mt-1 text-sm text-gray-500">
 
                 {editandoId !== null
@@ -417,8 +331,6 @@ export default function AdminServicos() {
               </p>
 
             </div>
-
-
 
             {editandoId !== null && (
 
@@ -438,11 +350,7 @@ export default function AdminServicos() {
 
             )}
 
-
-
           </div>
-
-
 
           <form
 
@@ -452,8 +360,6 @@ export default function AdminServicos() {
 
           >
 
-
-
             <div>
 
               <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -461,8 +367,6 @@ export default function AdminServicos() {
                 Nome do serviço
 
               </label>
-
-
 
               <input
 
@@ -480,8 +384,6 @@ export default function AdminServicos() {
 
             </div>
 
-
-
             <div>
 
               <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -489,8 +391,6 @@ export default function AdminServicos() {
                 Descrição
 
               </label>
-
-
 
               <textarea
 
@@ -508,11 +408,7 @@ export default function AdminServicos() {
 
             </div>
 
-
-
             <div className="flex justify-end">
-
-
 
               <button
 
@@ -530,29 +426,17 @@ export default function AdminServicos() {
 
               </button>
 
-
-
             </div>
-
-
 
           </form>
 
-
-
         </section>
 
-
-
-        {/** LISTA **/}
+        {/* LISTA */}
 
         <section>
 
-
-
           <div className="mb-5 flex items-center justify-between">
-
-
 
             <div>
 
@@ -561,8 +445,6 @@ export default function AdminServicos() {
                 Serviços cadastrados
 
               </h3>
-
-
 
               <p className="mt-1 text-sm text-gray-500">
 
@@ -578,19 +460,11 @@ export default function AdminServicos() {
 
             </div>
 
-
-
           </div>
-
-
 
           {servicos.length === 0 ? (
 
-
-
             <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-
-
 
               <div className="text-4xl">
 
@@ -598,15 +472,11 @@ export default function AdminServicos() {
 
               </div>
 
-
-
               <h3 className="mt-4 text-lg font-bold text-[#173690]">
 
                 Nenhum serviço cadastrado
 
               </h3>
-
-
 
               <p className="mt-2 text-sm text-gray-500">
 
@@ -614,23 +484,13 @@ export default function AdminServicos() {
 
               </p>
 
-
-
             </div>
-
-
 
           ) : (
 
-
-
             <div className="grid gap-5 md:grid-cols-2">
 
-
-
               {servicos.map((servico) => (
-
-
 
                 <article
 
@@ -640,15 +500,9 @@ export default function AdminServicos() {
 
                 >
 
-
-
                   <div className="flex items-start justify-between gap-4">
 
-
-
                     <div className="flex min-w-0 items-start gap-4">
-
-
 
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#36b970]/10 text-2xl">
 
@@ -656,11 +510,7 @@ export default function AdminServicos() {
 
                       </div>
 
-
-
                       <div className="min-w-0">
-
-
 
                         <h4 className="text-lg font-bold text-[#173690]">
 
@@ -668,31 +518,19 @@ export default function AdminServicos() {
 
                         </h4>
 
-
-
                         <p className="mt-2 text-sm leading-6 text-gray-600">
 
                           {servico.descricao}
 
                         </p>
 
-
-
                       </div>
-
-
 
                     </div>
 
-
-
                   </div>
 
-
-
                   <div className="mt-6 flex gap-3 border-t border-gray-100 pt-5">
-
-
 
                     <button
 
@@ -708,8 +546,6 @@ export default function AdminServicos() {
 
                     </button>
 
-
-
                     <button
 
                       type="button"
@@ -724,41 +560,23 @@ export default function AdminServicos() {
 
                     </button>
 
-
-
                   </div>
-
-
 
                 </article>
 
-
-
               ))}
-
-
 
             </div>
 
-
-
           )}
-
-
 
         </section>
 
-
-
       </section>
 
-
-
-      {/** FOOTER **/}
+      {/* FOOTER */}
 
       <footer className="mt-10 bg-[#173690] px-6 py-8 text-center text-sm text-white/80">
-
-
 
         <p>
 
@@ -766,19 +584,13 @@ export default function AdminServicos() {
 
         </p>
 
-
-
         <p className="mt-1 text-[#36b970]">
 
           Gerenciamento de serviços
 
         </p>
 
-
-
       </footer>
-
-
 
     </main>
 

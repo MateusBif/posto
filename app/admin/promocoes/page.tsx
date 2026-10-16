@@ -1,12 +1,8 @@
 "use client";
 
-
-
 import { FormEvent, useState } from "react";
 
 import Link from "next/link";
-
-
 
 type Promocao = {
 
@@ -25,8 +21,6 @@ type Promocao = {
   ativa: boolean;
 
 };
-
-
 
 export default function AdminPromocoes() {
 
@@ -74,8 +68,6 @@ export default function AdminPromocoes() {
 
   ]);
 
-
-
   const [titulo, setTitulo] = useState("");
 
   const [descricao, setDescricao] = useState("");
@@ -88,13 +80,9 @@ export default function AdminPromocoes() {
 
   const [ativa, setAtiva] = useState(true);
 
-
-
   const [editandoId, setEditandoId] = useState<number | null>(null);
 
   const [mensagem, setMensagem] = useState("");
-
-
 
   function limparFormulario() {
 
@@ -114,13 +102,9 @@ export default function AdminPromocoes() {
 
   }
 
-
-
   function salvarPromocao(event: FormEvent) {
 
     event.preventDefault();
-
-
 
     if (
 
@@ -139,8 +123,6 @@ export default function AdminPromocoes() {
       return;
 
     }
-
-
 
     if (editandoId !== null) {
 
@@ -174,8 +156,6 @@ export default function AdminPromocoes() {
 
       );
 
-
-
       setMensagem("Promoção atualizada com sucesso!");
 
     } else {
@@ -198,8 +178,6 @@ export default function AdminPromocoes() {
 
       };
 
-
-
       setPromocoes((listaAtual) => [
 
         ...listaAtual,
@@ -208,17 +186,11 @@ export default function AdminPromocoes() {
 
       ]);
 
-
-
       setMensagem("Promoção cadastrada com sucesso!");
 
     }
 
-
-
     limparFormulario();
-
-
 
     setTimeout(() => {
 
@@ -227,8 +199,6 @@ export default function AdminPromocoes() {
     }, 3000);
 
   }
-
-
 
   function editarPromocao(promocao: Promocao) {
 
@@ -246,8 +216,6 @@ export default function AdminPromocoes() {
 
     setEditandoId(promocao.id);
 
-
-
     window.scrollTo({
 
       top: 0,
@@ -258,8 +226,6 @@ export default function AdminPromocoes() {
 
   }
 
-
-
   function excluirPromocao(id: number) {
 
     const confirmar = window.confirm(
@@ -268,15 +234,11 @@ export default function AdminPromocoes() {
 
     );
 
-
-
     if (!confirmar) {
 
       return;
 
     }
-
-
 
     setPromocoes((listaAtual) =>
 
@@ -284,11 +246,7 @@ export default function AdminPromocoes() {
 
     );
 
-
-
     setMensagem("Promoção excluída com sucesso!");
-
-
 
     setTimeout(() => {
 
@@ -297,8 +255,6 @@ export default function AdminPromocoes() {
     }, 3000);
 
   }
-
-
 
   function alternarStatus(id: number) {
 
@@ -324,21 +280,14 @@ export default function AdminPromocoes() {
 
   }
 
-
-
   return (
 
     <main className="min-h-screen bg-gray-100">
 
 
-
-      {/** HEADER **/}
-
       <header className="bg-[#173690] text-white shadow-lg">
 
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-
-
 
           <div>
 
@@ -348,8 +297,6 @@ export default function AdminPromocoes() {
 
             </h1>
 
-
-
             <p className="text-sm text-white/80">
 
               Painel Administrativo
@@ -358,11 +305,7 @@ export default function AdminPromocoes() {
 
           </div>
 
-
-
           <div className="flex items-center gap-3">
-
-
 
             <Link
 
@@ -376,8 +319,6 @@ export default function AdminPromocoes() {
 
             </Link>
 
-
-
             <Link
 
               href="/"
@@ -390,29 +331,15 @@ export default function AdminPromocoes() {
 
             </Link>
 
-
-
           </div>
-
-
 
         </div>
 
       </header>
 
-
-
-      {/** CONTEÚDO **/}
-
       <section className="mx-auto max-w-6xl px-6 py-10">
 
-
-
-        {/** TÍTULO **/}
-
         <div className="mb-8">
-
-
 
           <p className="text-sm font-semibold uppercase tracking-wide text-[#36b970]">
 
@@ -420,15 +347,11 @@ export default function AdminPromocoes() {
 
           </p>
 
-
-
           <h2 className="mt-2 text-3xl font-bold text-[#173690]">
 
             Promoções e Sorteios
 
           </h2>
-
-
 
           <p className="mt-2 text-gray-600">
 
@@ -438,13 +361,7 @@ export default function AdminPromocoes() {
 
           </p>
 
-
-
         </div>
-
-
-
-        {/** MENSAGEM **/}
 
         {mensagem && (
 
@@ -464,8 +381,6 @@ export default function AdminPromocoes() {
 
             <div className="flex items-center gap-3">
 
-
-
               <span className="text-xl">
 
                 {mensagem.includes("Preencha")
@@ -476,15 +391,11 @@ export default function AdminPromocoes() {
 
               </span>
 
-
-
               <p className="font-semibold">
 
                 {mensagem}
 
               </p>
-
-
 
             </div>
 
@@ -492,17 +403,9 @@ export default function AdminPromocoes() {
 
         )}
 
-
-
-        {/** FORMULÁRIO **/}
-
         <section className="mb-10 rounded-2xl bg-white p-6 shadow-sm">
 
-
-
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-
-
 
             <div>
 
@@ -516,8 +419,6 @@ export default function AdminPromocoes() {
 
               </h3>
 
-
-
               <p className="mt-1 text-sm text-gray-500">
 
                 Cadastre uma promoção ou sorteio para divulgação.
@@ -525,8 +426,6 @@ export default function AdminPromocoes() {
               </p>
 
             </div>
-
-
 
             {editandoId !== null && (
 
@@ -546,11 +445,7 @@ export default function AdminPromocoes() {
 
             )}
 
-
-
           </div>
-
-
 
           <form
 
@@ -561,18 +456,13 @@ export default function AdminPromocoes() {
           >
 
 
-
-            {/** TÍTULO **/}
-
             <div>
 
               <label className="mb-2 block text-sm font-semibold text-gray-700">
 
-                Título *
+                Título \*
 
               </label>
-
-
 
               <input
 
@@ -591,18 +481,13 @@ export default function AdminPromocoes() {
             </div>
 
 
-
-            {/** TIPO **/}
-
             <div>
 
               <label className="mb-2 block text-sm font-semibold text-gray-700">
 
-                Tipo *
+                Tipo \*
 
               </label>
-
-
 
               <select
 
@@ -632,8 +517,6 @@ export default function AdminPromocoes() {
 
                 </option>
 
-
-
                 <option value="Sorteio">
 
                   Sorteio
@@ -645,18 +528,13 @@ export default function AdminPromocoes() {
             </div>
 
 
-
-            {/** DESCRIÇÃO **/}
-
             <div>
 
               <label className="mb-2 block text-sm font-semibold text-gray-700">
 
-                Descrição *
+                Descrição \*
 
               </label>
-
-
 
               <textarea
 
@@ -679,22 +557,15 @@ export default function AdminPromocoes() {
             </div>
 
 
-
-            {/** DATAS **/}
-
             <div className="grid gap-5 sm:grid-cols-2">
-
-
 
               <div>
 
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
 
-                  Data de início *
+                  Data de início \*
 
                 </label>
-
-
 
                 <input
 
@@ -714,17 +585,13 @@ export default function AdminPromocoes() {
 
               </div>
 
-
-
               <div>
 
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
 
-                  Data de encerramento *
+                  Data de encerramento \*
 
                 </label>
-
-
 
                 <input
 
@@ -744,21 +611,12 @@ export default function AdminPromocoes() {
 
               </div>
 
-
-
             </div>
 
 
-
-            {/** STATUS **/}
-
             <div className="rounded-xl bg-gray-50 p-4">
 
-
-
               <label className="flex cursor-pointer items-center gap-3">
-
-
 
                 <input
 
@@ -776,8 +634,6 @@ export default function AdminPromocoes() {
 
                 />
 
-
-
                 <div>
 
                   <p className="font-semibold text-gray-800">
@@ -785,8 +641,6 @@ export default function AdminPromocoes() {
                     Promoção ativa
 
                   </p>
-
-
 
                   <p className="text-sm text-gray-500">
 
@@ -796,21 +650,12 @@ export default function AdminPromocoes() {
 
                 </div>
 
-
-
               </label>
-
-
 
             </div>
 
 
-
-            {/** BOTÃO **/}
-
             <div className="flex justify-end">
-
-
 
               <button
 
@@ -828,37 +673,23 @@ export default function AdminPromocoes() {
 
               </button>
 
-
-
             </div>
-
-
 
           </form>
 
-
-
         </section>
 
-
-
-        {/** LISTA **/}
+        {/* LISTA */}
 
         <section>
 
-
-
           <div className="mb-5">
-
-
 
             <h3 className="text-xl font-bold text-[#173690]">
 
               Promoções cadastradas
 
             </h3>
-
-
 
             <p className="mt-1 text-sm text-gray-500">
 
@@ -872,19 +703,11 @@ export default function AdminPromocoes() {
 
             </p>
 
-
-
           </div>
-
-
 
           {promocoes.length === 0 ? (
 
-
-
             <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-
-
 
               <div className="text-5xl">
 
@@ -892,15 +715,11 @@ export default function AdminPromocoes() {
 
               </div>
 
-
-
               <h3 className="mt-4 text-lg font-bold text-[#173690]">
 
                 Nenhuma promoção cadastrada
 
               </h3>
-
-
 
               <p className="mt-2 text-sm text-gray-500">
 
@@ -910,23 +729,13 @@ export default function AdminPromocoes() {
 
               </p>
 
-
-
             </div>
-
-
 
           ) : (
 
-
-
             <div className="grid gap-5 lg:grid-cols-2">
 
-
-
               {promocoes.map((promocao) => (
-
-
 
                 <article
 
@@ -937,16 +746,9 @@ export default function AdminPromocoes() {
                 >
 
 
-
-                  {/** TOPO DO CARD **/}
-
                   <div className="flex items-start justify-between gap-4">
 
-
-
                     <div className="flex min-w-0 items-start gap-4">
-
-
 
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#36b970]/10 text-2xl">
 
@@ -958,23 +760,15 @@ export default function AdminPromocoes() {
 
                       </div>
 
-
-
                       <div className="min-w-0">
 
-
-
                         <div className="mb-2 flex flex-wrap items-center gap-2">
-
-
 
                           <span className="rounded-full bg-[#36b970]/10 px-3 py-1 text-xs font-bold text-[#173690]">
 
                             {promocao.tipo}
 
                           </span>
-
-
 
                           <span
 
@@ -998,11 +792,7 @@ export default function AdminPromocoes() {
 
                           </span>
 
-
-
                         </div>
-
-
 
                         <h4 className="text-lg font-bold text-[#173690]">
 
@@ -1010,21 +800,12 @@ export default function AdminPromocoes() {
 
                         </h4>
 
-
-
                       </div>
-
-
 
                     </div>
 
-
-
                   </div>
 
-
-
-                  {/** DESCRIÇÃO **/}
 
                   <p className="mt-5 text-sm leading-6 text-gray-600">
 
@@ -1033,12 +814,7 @@ export default function AdminPromocoes() {
                   </p>
 
 
-
-                  {/** DATAS **/}
-
                   <div className="mt-5 grid gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-2">
-
-
 
                     <div>
 
@@ -1048,8 +824,6 @@ export default function AdminPromocoes() {
 
                       </p>
 
-
-
                       <p className="mt-1 font-semibold text-gray-800">
 
                         {promocao.inicio}
@@ -1057,8 +831,6 @@ export default function AdminPromocoes() {
                       </p>
 
                     </div>
-
-
 
                     <div>
 
@@ -1068,8 +840,6 @@ export default function AdminPromocoes() {
 
                       </p>
 
-
-
                       <p className="mt-1 font-semibold text-gray-800">
 
                         {promocao.fim}
@@ -1078,17 +848,10 @@ export default function AdminPromocoes() {
 
                     </div>
 
-
-
                   </div>
 
 
-
-                  {/** AÇÕES **/}
-
                   <div className="mt-6 grid gap-3 border-t border-gray-100 pt-5 sm:grid-cols-3">
-
-
 
                     <button
 
@@ -1107,8 +870,6 @@ export default function AdminPromocoes() {
                       ✏️ Editar
 
                     </button>
-
-
 
                     <button
 
@@ -1132,8 +893,6 @@ export default function AdminPromocoes() {
 
                     </button>
 
-
-
                     <button
 
                       type="button"
@@ -1152,41 +911,22 @@ export default function AdminPromocoes() {
 
                     </button>
 
-
-
                   </div>
-
-
 
                 </article>
 
-
-
               ))}
-
-
 
             </div>
 
-
-
           )}
 
-
-
         </section>
-
-
 
       </section>
 
 
-
-      {/** FOOTER **/}
-
       <footer className="mt-10 bg-[#173690] px-6 py-8 text-center text-sm text-white/80">
-
-
 
         <p>
 
@@ -1194,19 +934,13 @@ export default function AdminPromocoes() {
 
         </p>
 
-
-
         <p className="mt-1 text-[#36b970]">
 
           Gerenciamento de promoções e sorteios
 
         </p>
 
-
-
       </footer>
-
-
 
     </main>
 

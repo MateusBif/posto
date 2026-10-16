@@ -1,1851 +1,1379 @@
 "use client";
 
-
-
 import { useState } from "react";
-
-
 
 export default function Home() {
 
-  const [menuAberto, setMenuAberto] = useState(false);
+const [menuAberto, setMenuAberto] = useState(false);
 
+return (
 
+<main className="min-h-screen bg-white text-gray-900">
 
-  return (
+  {/* =====================================================**
 
-    <main className="min-h-screen bg-white text-gray-900">
+  **          CABEÇALHO**
 
-      {/** =====================================================*
+  **      ====================================================== */}
 
-*          CABEÇALHO*
+  <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
 
-*      ====================================================== */}
+    <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
 
+      {/* LOGO PROVISÓRIA */}
 
+      <a href="/" className="flex items-center gap-3">
 
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#36B970] text-xl font-black text-white">
 
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
-
-
-
-          {/** LOGO PROVISÓRIA */}
-
-
-
-          <a href="/" className="flex items-center gap-3">
-
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#36B970] text-xl font-black text-white">
-
-              PG
-
-            </div>
-
-
-
-            <div>
-
-              <h1 className="text-lg font-extrabold leading-none text-[#173690] sm:text-xl">
-
-                Posto Gasparin
-
-              </h1>
-
-
-
-              <p className="mt-1 text-xs font-medium text-gray-500">
-
-                Grupo Potencial
-
-              </p>
-
-            </div>
-
-          </a>
-
-
-
-          {/** MENU DESKTOP */}
-
-
-
-          <nav className="hidden items-center gap-7 lg:flex">
-
-
-
-            <a
-
-              href="/"
-
-              className="font-semibold text-[#36B970] transition hover:text-[#36B970]"
-
-            >
-
-              Início
-
-            </a>
-
-
-
-            <a
-
-              href="/o-posto"
-
-              className="font-medium text-gray-700 transition hover:text-[#36B970]"
-
-            >
-
-              O Posto
-
-            </a>
-
-
-
-            <a
-
-              href="/servicos"
-
-              className="font-medium text-gray-700 transition hover:text-[#36B970]"
-
-            >
-
-              Serviços
-
-            </a>
-
-
-
-            <a
-
-              href="/galeria"
-
-              className="font-medium text-gray-700 transition hover:text-[#36B970]"
-
-            >
-
-              Galeria
-
-            </a>
-
-
-
-            <a
-
-              href="/promocoes"
-
-              className="font-medium text-gray-700 transition hover:text-[#36B970]"
-
-            >
-
-              Promoções
-
-            </a>
-
-
-
-            {/** CONTATO */}
-
-            <a
-
-              href="/contato"
-
-              className="font-medium text-gray-700 transition hover:text-[#36B970]"
-
-            >
-
-              Contato
-
-            </a>
-
-
-
-            {/** LOGIN */}
-
-            <a
-
-              href="/admin/login"
-
-              className="rounded-lg bg-[#36B970] px-5 py-3 font-bold text-[#173690] transition hover:bg-[#36B970]/90"
-
-            >
-
-              Login
-
-            </a>
-
-
-
-          </nav>
-
-
-
-          {/** BOTÃO MOBILE */}
-
-
-
-          <button
-
-            type="button"
-
-            onClick={() => setMenuAberto(!menuAberto)}
-
-            className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-800 lg:hidden"
-
-            aria-label="Abrir menu"
-
-            aria-expanded={menuAberto}
-
-          >
-
-            {menuAberto ? "✕" : "☰"}
-
-          </button>
+          PG
 
         </div>
 
+        <div>
 
+          <h1 className="text-lg font-extrabold leading-none text-[#173690] sm:text-xl">
 
-        {/** MENU MOBILE */}
+            Posto Gasparin
 
+          </h1>
 
+          <p className="mt-1 text-xs font-medium text-gray-500">
 
-        {menuAberto && (
+            Grupo Potencial
 
-          <div className="border-t border-gray-200 bg-white px-5 py-4 lg:hidden">
-
-            <nav className="mx-auto flex max-w-7xl flex-col">
-
-
-
-              <a
-
-                href="/"
-
-                onClick={() => setMenuAberto(false)}
-
-                className="border-b border-gray-100 py-4 font-semibold text-[#36B970]"
-
-              >
-
-                Início
-
-              </a>
-
-
-
-              <a
-
-                href="/o-posto"
-
-                onClick={() => setMenuAberto(false)}
-
-                className="border-b border-gray-100 py-4 font-medium text-gray-700"
-
-              >
-
-                O Posto
-
-              </a>
-
-
-
-              <a
-
-                href="/servicos"
-
-                onClick={() => setMenuAberto(false)}
-
-                className="border-b border-gray-100 py-4 font-medium text-gray-700"
-
-              >
-
-                Serviços
-
-              </a>
-
-
-
-              <a
-
-                href="/galeria"
-
-                onClick={() => setMenuAberto(false)}
-
-                className="border-b border-gray-100 py-4 font-medium text-gray-700"
-
-              >
-
-                Galeria
-
-              </a>
-
-
-
-              <a
-
-                href="/promocoes"
-
-                onClick={() => setMenuAberto(false)}
-
-                className="border-b border-gray-100 py-4 font-medium text-gray-700"
-
-              >
-
-                Promoções / Sorteios
-
-              </a>
-
-
-
-              {/** CONTATO MOBILE */}
-
-              <a
-
-                href="/contato"
-
-                onClick={() => setMenuAberto(false)}
-
-                className="mt-4 rounded-lg bg-[#36B970] px-5 py-3 text-center font-bold text-white"
-
-              >
-
-                Contato
-
-              </a>
-
-
-
-              {/** LOGIN MOBILE */}
-
-              <a
-
-                href="/admin/login"
-
-                onClick={() => setMenuAberto(false)}
-
-                className="mt-3 rounded-lg bg-[#36B970] px-5 py-3 text-center font-bold text-[#173690]"
-
-              >
-
-                Login
-
-              </a>
-
-
-
-            </nav>
-
-          </div>
-
-        )}
-
-      </header>
-
-
-
-      {/** =====================================================*
-
-*          HERO*
-
-*      ====================================================== */}
-
-
-
-      <section className="relative overflow-hidden bg-[#173690]">
-
-
-
-        {/** Elementos decorativos */}
-
-
-
-        <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#36B970]/40" />
-
-        <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-[#36B970]/30" />
-
-
-
-        <div className="relative mx-auto grid min-h-[620px] max-w-7xl items-center gap-12 px-5 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
-
-
-
-          {/** TEXTO */}
-
-
-
-          <div className="max-w-2xl">
-
-
-
-            <span className="inline-flex rounded-full border border-[#36B970]/40 bg-[#36B970]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#36B970]">
-
-              Posto Gasparin
-
-            </span>
-
-
-
-            <h2 className="mt-7 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
-
-              Seu caminho começa
-
-              <span className="block text-[#36B970]">
-
-                aqui.
-
-              </span>
-
-            </h2>
-
-
-
-            <p className="mt-6 max-w-xl text-base leading-7 text-gray-200 sm:text-lg">
-
-              Conteúdo provisório para apresentação do Posto Gasparin.
-
-              Esta área será atualizada posteriormente através do painel
-
-              administrativo.
-
-            </p>
-
-
-
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-
-
-
-              <a
-
-                href="/servicos"
-
-                className="rounded-xl bg-[#36B970] px-7 py-4 text-center font-extrabold text-[#173690] shadow-lg transition hover:bg-[#36B970]/90"
-
-              >
-
-                Conheça nossos serviços
-
-              </a>
-
-
-
-              <a
-
-                href="/contato"
-
-                className="rounded-xl border border-white/40 bg-white/5 px-7 py-4 text-center font-bold text-white transition hover:bg-white hover:text-[#173690]"
-
-              >
-
-                Como chegar
-
-              </a>
-
-
-
-            </div>
-
-          </div>
-
-
-
-          {/** ESPAÇO PARA FUTURA FOTO */}
-
-
-
-          <div className="hidden lg:block">
-
-            <div className="relative mx-auto max-w-xl">
-
-
-
-              <div className="aspect-[4/3] overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#36B970] to-[#173690] shadow-2xl">
-
-
-
-                <div className="flex h-full flex-col items-center justify-center p-10 text-center">
-
-
-
-                  <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-[#36B970] text-3xl font-black text-[#173690]">
-
-                    PG
-
-                  </div>
-
-
-
-                  <h3 className="mt-7 text-2xl font-bold text-white">
-
-                    Foto do posto
-
-                  </h3>
-
-
-
-                  <p className="mt-3 max-w-sm text-sm leading-6 text-gray-300">
-
-                    Espaço reservado para a imagem real da fachada ou área de
-
-                    abastecimento.
-
-                  </p>
-
-
-
-                </div>
-
-              </div>
-
-
-
-            </div>
-
-          </div>
-
-
+          </p>
 
         </div>
 
-      </section>
+      </a>
 
+      {/* MENU DESKTOP */}
 
+      <nav className="hidden items-center gap-7 lg:flex">
 
-      {/** =====================================================*
+        <a
 
-*          ACESSOS RÁPIDOS*
+        href="/"
 
-*      ====================================================== */}
+        className="font-semibold text-[#36B970] transition hover:text-[#36B970]"
 
+        >
 
+        Início
 
-      <section className="bg-gray-50 px-5 py-20 sm:px-6 lg:px-8">
+      </a>
 
-        <div className="mx-auto max-w-7xl">
+      <a
 
+      href="/o-posto"
 
+      className="font-medium text-gray-700 transition hover:text-[#36B970]"
 
-          <div className="max-w-2xl">
+      >
 
+      O Posto
 
+    </a>
 
-            <span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
+    <a
 
-              Tudo em um só lugar
+    href="/servicos"
 
-            </span>
+    className="font-medium text-gray-700 transition hover:text-[#36B970]"
 
+    >
 
+    Serviços
 
-            <h2 className="mt-3 text-3xl font-black text-[#173690] sm:text-4xl">
+  </a>
 
-              Encontre o que precisa
+  <a
 
-            </h2>
+  href="/galeria"
 
+  className="font-medium text-gray-700 transition hover:text-[#36B970]"
 
+  >
 
-            <p className="mt-4 leading-7 text-gray-600">
+  Galeria
 
-              Acesse rapidamente as principais informações do Posto Gasparin.
+</a>
 
-            </p>
+<a
 
+href="/promocoes"
 
+className="font-medium text-gray-700 transition hover:text-[#36B970]"
 
-          </div>
+>
 
+Promoções
 
+</a>
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+{/* CONTATO */}
 
+<a
 
+href="/contato"
 
-            <a
+className="font-medium text-gray-700 transition hover:text-[#36B970]"
 
-              href="/o-posto"
+>
 
-              className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
+Contato
 
-            >
+</a>
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
+{/* LOGIN */}
 
-                ⛽
+<a
 
-              </div>
+href="/admin/login"
 
+className="rounded-lg bg-[#36B970] px-5 py-3 font-bold text-[#173690] transition hover:bg-[#36B970]/90"
 
+>
 
-              <h3 className="mt-6 text-xl font-extrabold">
+Login
 
-                O Posto
+</a>
 
-              </h3>
+</nav>
 
+{/* BOTÃO MOBILE */}
 
+<button
 
-              <p className="mt-2 text-sm leading-6 text-gray-600">
+type="button"
 
-                Conheça o posto e encontre informações importantes.
+onClick={() => setMenuAberto(!menuAberto)}
 
-              </p>
+className="flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 text-xl text-gray-800 lg:hidden"
 
+aria-label="Abrir menu"
 
+aria-expanded={menuAberto}
 
-              <span className="mt-5 block font-bold text-[#36B970]">
+>
 
-                Saiba mais →
+{menuAberto ? "✕" : "☰"}
 
-              </span>
+</button>
 
-            </a>
+</div>
 
+{/* MENU MOBILE */}
 
+{menuAberto && (
 
-            <a
+<div className="border-t border-gray-200 bg-white px-5 py-4 lg:hidden">
 
-              href="/servicos"
+<nav className="mx-auto flex max-w-7xl flex-col">
 
-              className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
+<a
 
-            >
+href="/"
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
+onClick={() => setMenuAberto(false)}
 
-                🔧
+className="border-b border-gray-100 py-4 font-semibold text-[#36B970]"
 
-              </div>
+>
 
+Início
 
+</a>
 
-              <h3 className="mt-6 text-xl font-extrabold">
+<a
 
-                Serviços
+href="/o-posto"
 
-              </h3>
+onClick={() => setMenuAberto(false)}
 
+className="border-b border-gray-100 py-4 font-medium text-gray-700"
 
+>
 
-              <p className="mt-2 text-sm leading-6 text-gray-600">
+O Posto
 
-                Consulte os serviços oferecidos pelo posto.
+</a>
 
-              </p>
+<a
 
+href="/servicos"
 
+onClick={() => setMenuAberto(false)}
 
-              <span className="mt-5 block font-bold text-[#36B970]">
+className="border-b border-gray-100 py-4 font-medium text-gray-700"
 
-                Ver serviços →
+>
 
-              </span>
+Serviços
 
-            </a>
+</a>
 
+<a
 
+href="/galeria"
 
-            <a
+onClick={() => setMenuAberto(false)}
 
-              href="/promocoes"
+className="border-b border-gray-100 py-4 font-medium text-gray-700"
 
-              className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
+>
 
-            >
+Galeria
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
+</a>
 
-                🎁
+<a
 
-              </div>
+href="/promocoes"
 
+onClick={() => setMenuAberto(false)}
 
+className="border-b border-gray-100 py-4 font-medium text-gray-700"
 
-              <h3 className="mt-6 text-xl font-extrabold">
+>
 
-                Promoções
+Promoções / Sorteios
 
-              </h3>
+</a>
 
+{/* CONTATO MOBILE */}
 
+<a
 
-              <p className="mt-2 text-sm leading-6 text-gray-600">
+href="/contato"
 
-                Confira promoções, campanhas e sorteios.
+onClick={() => setMenuAberto(false)}
 
-              </p>
+className="mt-4 rounded-lg bg-[#36B970] px-5 py-3 text-center font-bold text-white"
 
+>
 
+Contato
 
-              <span className="mt-5 block font-bold text-[#36B970]">
+</a>
 
-                Conferir →
+{/* LOGIN MOBILE */}
 
-              </span>
+<a
 
-            </a>
+href="/admin/login"
 
+onClick={() => setMenuAberto(false)}
 
+className="mt-3 rounded-lg bg-[#36B970] px-5 py-3 text-center font-bold text-[#173690]"
 
-            <a
+>
 
-              href="/contato"
+Login
 
-              className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
+</a>
 
-            >
+</nav>
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
+</div>
 
-                📍
+)}
 
-              </div>
+</header>
 
+{/* =====================================================**
 
+**          HERO**
 
-              <h3 className="mt-6 text-xl font-extrabold">
+**      ====================================================== */}
 
-                Localização
+<section className="relative overflow-hidden bg-[#173690]">
 
-              </h3>
+{/* Elementos decorativos */}
 
+<div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#36B970]/40" />
 
+<div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-[#36B970]/30" />
 
-              <p className="mt-2 text-sm leading-6 text-gray-600">
+<div className="relative mx-auto grid min-h-[620px] max-w-7xl items-center gap-12 px-5 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
 
-                Veja o endereço e descubra como chegar.
+  {/* TEXTO */}
 
-              </p>
+  <div className="max-w-2xl">
 
+    <span className="inline-flex rounded-full border border-[#36B970]/40 bg-[#36B970]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#36B970]">
 
+      Posto Gasparin
 
-              <span className="mt-5 block font-bold text-[#36B970]">
+    </span>
 
-                Ver localização →
+    <h2 className="mt-7 text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
 
-              </span>
+      Seu caminho começa
 
-            </a>
+      <span className="block text-[#36B970]">
 
+        aqui.
 
+      </span>
 
-          </div>
+    </h2>
 
-        </div>
+    <p className="mt-6 max-w-xl text-base leading-7 text-gray-200 sm:text-lg">
 
-      </section>
+      Conteúdo provisório para apresentação do Posto Gasparin.
 
+      Esta área será atualizada posteriormente através do painel
 
+      administrativo.
 
-      {/** =====================================================*
+    </p>
 
-*          SOBRE O POSTO*
+    <div className="mt-9 flex flex-col gap-3 sm:flex-row">
 
-*      ====================================================== */}
+      <a
 
+      href="/servicos"
 
+      className="rounded-xl bg-[#36B970] px-7 py-4 text-center font-extrabold text-[#173690] shadow-lg transition hover:bg-[#36B970]/90"
 
-      <section className="px-5 py-20 sm:px-6 lg:px-8">
+      >
 
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:items-center">
+      Conheça nossos serviços
 
+    </a>
 
+    <a
 
-          {/** PLACEHOLDER IMAGEM */}
+    href="/contato"
 
+    className="rounded-xl border border-white/40 bg-white/5 px-7 py-4 text-center font-bold text-white transition hover:bg-white hover:text-[#173690]"
 
+    >
 
-          <div className="order-2 lg:order-1">
+    Como chegar
 
-            <div className="aspect-[4/3] rounded-3xl bg-gray-100 p-5">
+  </a>
 
+</div>
 
+</div>
 
-              <div className="flex h-full items-center justify-center rounded-2xl border-2 border-dashed border-gray-300">
+{/* ESPAÇO PARA FUTURA FOTO */}
 
+<div className="hidden lg:block">
 
+<div className="relative mx-auto max-w-xl">
 
-                <div className="max-w-sm text-center">
+  <div className="aspect-[4/3] overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#36B970] to-[#173690] shadow-2xl">
 
+    <div className="flex h-full flex-col items-center justify-center p-10 text-center">
 
+      <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-[#36B970] text-3xl font-black text-[#173690]">
 
-                  <div className="text-5xl">📷</div>
+        PG
 
+      </div>
 
+      <h3 className="mt-7 text-2xl font-bold text-white">
 
-                  <h3 className="mt-5 text-xl font-bold text-gray-800">
+        Foto do posto
 
-                    Imagem do Posto
+      </h3>
 
-                  </h3>
+      <p className="mt-3 max-w-sm text-sm leading-6 text-gray-300">
 
+        Espaço reservado para a imagem real da fachada ou área de
 
+        abastecimento.
 
-                  <p className="mt-2 text-sm leading-6 text-gray-500">
+      </p>
 
-                    Espaço reservado para uma foto real que poderá ser
+    </div>
 
-                    adicionada posteriormente pelo painel administrativo.
+  </div>
 
-                  </p>
+</div>
 
+</div>
 
+</div>
 
-                </div>
+</section>
 
-              </div>
+{/* =====================================================**
 
-            </div>
+**          ACESSOS RÁPIDOS**
 
-          </div>
+**      ====================================================== */}
 
+<section className="bg-gray-50 px-5 py-20 sm:px-6 lg:px-8">
 
+<div className="mx-auto max-w-7xl">
 
-          {/** TEXTO */}
+<div className="max-w-2xl">
 
+<span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
 
+  Tudo em um só lugar
 
-          <div className="order-1 lg:order-2">
+</span>
 
+<h2 className="mt-3 text-3xl font-black text-[#173690] sm:text-4xl">
 
+  Encontre o que precisa
 
-            <span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
+</h2>
 
-              O Posto
+<p className="mt-4 leading-7 text-gray-600">
 
-            </span>
+  Acesse rapidamente as principais informações do Posto Gasparin.
 
+</p>
 
+</div>
 
-            <h2 className="mt-3 text-3xl font-black leading-tight text-[#173690] sm:text-4xl">
+<div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
-              Um espaço preparado para receber você
+<a
 
-            </h2>
+href="/o-posto"
 
+className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
 
+>
 
-            <p className="mt-6 leading-7 text-gray-600">
+<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
 
-              Este conteúdo é provisório e será substituído pelas informações
+  ⛽
 
-              oficiais do Posto Gasparin através do painel administrativo.
+</div>
 
-            </p>
+<h3 className="mt-6 text-xl font-extrabold">
 
+  O Posto
 
+</h3>
 
-            <p className="mt-4 leading-7 text-gray-600">
+<p className="mt-2 text-sm leading-6 text-gray-600">
 
-              Aqui poderemos apresentar a história, estrutura, diferenciais,
+  Conheça o posto e encontre informações importantes.
 
-              localização e outras informações importantes sobre o posto.
+</p>
 
-            </p>
+<span className="mt-5 block font-bold text-[#36B970]">
 
+  Saiba mais →
 
+</span>
 
-            <a
+</a>
 
-              href="/o-posto"
+<a
 
-              className="mt-7 inline-flex rounded-xl bg-[#36B970] px-6 py-3 font-bold text-white transition hover:bg-[#36B970]"
+href="/servicos"
 
-            >
+className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
 
-              Conheça o posto
+>
 
-            </a>
+<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
 
+🔧
 
+</div>
 
-          </div>
+<h3 className="mt-6 text-xl font-extrabold">
 
+Serviços
 
+</h3>
 
-        </div>
+<p className="mt-2 text-sm leading-6 text-gray-600">
 
-      </section>
+Consulte os serviços oferecidos pelo posto.
 
+</p>
 
+<span className="mt-5 block font-bold text-[#36B970]">
 
-      {/** =====================================================*
+Ver serviços →
 
-*          SERVIÇOS*
+</span>
 
-*      ====================================================== */}
+</a>
 
+<a
 
+href="/promocoes"
 
-      <section className="bg-[#173690] px-5 py-20 sm:px-6 lg:px-8">
+className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
 
-        <div className="mx-auto max-w-7xl">
+>
 
+<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
 
+🎁
 
-          <div className="text-center">
+</div>
 
+<h3 className="mt-6 text-xl font-extrabold">
 
+Promoções
 
-            <span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
+</h3>
 
-              Serviços
+<p className="mt-2 text-sm leading-6 text-gray-600">
 
-            </span>
+Confira promoções, campanhas e sorteios.
 
+</p>
 
+<span className="mt-5 block font-bold text-[#36B970]">
 
-            <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
+Conferir →
 
-              Tudo para facilitar sua parada
+</span>
 
-            </h2>
+</a>
 
+<a
 
+href="/contato"
 
-            <p className="mx-auto mt-4 max-w-2xl leading-7 text-gray-300">
+className="group rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-[#36B970]/30 hover:shadow-xl"
 
-              Os serviços abaixo são apenas exemplos para montagem da tela.
+>
 
-              Posteriormente serão cadastrados pelo administrador.
+<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#36B970]/10 text-xl">
 
-            </p>
+📍
 
+</div>
 
+<h3 className="mt-6 text-xl font-extrabold">
 
-          </div>
+Localização
 
+</h3>
 
+<p className="mt-2 text-sm leading-6 text-gray-600">
 
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+Veja o endereço e descubra como chegar.
 
+</p>
 
+<span className="mt-5 block font-bold text-[#36B970]">
 
-            {[
+Ver localização →
 
-              {
+</span>
 
-                icon: "⛽",
+</a>
 
-                title: "Abastecimento",
+</div>
 
-                text: "Espaço reservado para informações sobre abastecimento.",
+</div>
 
-              },
+</section>
 
-              {
+{/* =====================================================**
 
-                icon: "🛒",
+**          SOBRE O POSTO**
 
-                title: "Conveniência",
+**      ====================================================== */}
 
-                text: "Espaço reservado para informações da conveniência.",
+<section className="px-5 py-20 sm:px-6 lg:px-8">
 
-              },
+<div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:items-center">
 
-              {
+{/* PLACEHOLDER IMAGEM */}
 
-                icon: "🚗",
+<div className="order-2 lg:order-1">
 
-                title: "Serviço automotivo",
+<div className="aspect-[4/3] rounded-3xl bg-gray-100 p-5">
 
-                text: "Espaço reservado para os serviços automotivos.",
+<div className="flex h-full items-center justify-center rounded-2xl border-2 border-dashed border-gray-300">
 
-              },
+<div className="max-w-sm text-center">
 
-              {
+<div className="text-5xl">📷</div>
 
-                icon: "➕",
+<h3 className="mt-5 text-xl font-bold text-gray-800">
 
-                title: "Outro serviço",
+Imagem do Posto
 
-                text: "Novos serviços poderão ser adicionados futuramente.",
+</h3>
 
-              },
+<p className="mt-2 text-sm leading-6 text-gray-500">
 
-            ].map((servico) => (
+Espaço reservado para uma foto real que poderá ser
 
-              <div
+adicionada posteriormente pelo painel administrativo.
 
-                key={servico.title}
+</p>
 
-                className="rounded-2xl border border-white/10 bg-white/5 p-7 transition hover:bg-white/10"
+</div>
 
-              >
+</div>
 
-                <div className="text-3xl">
+</div>
 
-                  {servico.icon}
+</div>
 
-                </div>
+{/* TEXTO */}
 
+<div className="order-1 lg:order-2">
 
+<span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
 
-                <h3 className="mt-6 text-xl font-bold text-white">
+O Posto
 
-                  {servico.title}
+</span>
 
-                </h3>
+<h2 className="mt-3 text-3xl font-black leading-tight text-[#173690] sm:text-4xl">
 
+Um espaço preparado para receber você
 
+</h2>
 
-                <p className="mt-3 text-sm leading-6 text-gray-300">
+<p className="mt-6 leading-7 text-gray-600">
 
-                  {servico.text}
+Este conteúdo é provisório e será substituído pelas informações
 
-                </p>
+oficiais do Posto Gasparin através do painel administrativo.
 
-              </div>
+</p>
 
-            ))}
+<p className="mt-4 leading-7 text-gray-600">
 
+Aqui poderemos apresentar a história, estrutura, diferenciais,
 
+localização e outras informações importantes sobre o posto.
 
-          </div>
+</p>
 
+<a
 
+href="/o-posto"
 
-          <div className="mt-10 text-center">
+className="mt-7 inline-flex rounded-xl bg-[#36B970] px-6 py-3 font-bold text-white transition hover:bg-[#36B970]"
 
-            <a
+>
 
-              href="/servicos"
+Conheça o posto
 
-              className="inline-flex rounded-xl bg-[#36B970] px-7 py-3 font-extrabold text-[#173690] transition hover:bg-[#36B970]/90"
+</a>
 
-            >
+</div>
 
-              Ver todos os serviços
+</div>
 
-            </a>
+</section>
 
-          </div>
+{/* =====================================================**
 
+**          SERVIÇOS**
 
+**      ====================================================== */}
 
-        </div>
+<section className="bg-[#173690] px-5 py-20 sm:px-6 lg:px-8">
 
-      </section>
+<div className="mx-auto max-w-7xl">
 
+<div className="text-center">
 
+<span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
 
-      {/** =====================================================*
+Serviços
 
-*          PROMOÇÕES*
+</span>
 
-*      ====================================================== */}
+<h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
 
+Tudo para facilitar sua parada
 
+</h2>
 
-      <section className="px-5 py-20 sm:px-6 lg:px-8">
+<p className="mx-auto mt-4 max-w-2xl leading-7 text-gray-300">
 
-        <div className="mx-auto max-w-7xl">
+Os serviços abaixo são apenas exemplos para montagem da tela.
 
+Posteriormente serão cadastrados pelo administrador.
 
+</p>
 
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+</div>
 
+<div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
+{[
 
-            <div>
+{
 
+icon: "⛽",
 
+title: "Abastecimento",
 
-              <span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
+text: "Espaço reservado para informações sobre abastecimento.",
 
-                Promoções
+},
 
-              </span>
+{
 
+icon: "🛒",
 
+title: "Conveniência",
 
-              <h2 className="mt-3 text-3xl font-black text-[#173690] sm:text-4xl">
+text: "Espaço reservado para informações da conveniência.",
 
-                Promoções e sorteios
+},
 
-              </h2>
+{
 
+icon: "🚗",
 
+title: "Serviço automotivo",
 
-            </div>
+text: "Espaço reservado para os serviços automotivos.",
 
+},
 
+{
 
-            <a
+icon: "➕",
 
-              href="/promocoes"
+title: "Outro serviço",
 
-              className="font-bold text-[#36B970] hover:text-[#36B970]"
+text: "Novos serviços poderão ser adicionados futuramente.",
 
-            >
+},
 
-              Ver todas →
+].map((servico) => (
 
-            </a>
+<div
 
+key={servico.title}
 
+className="rounded-2xl border border-white/10 bg-white/5 p-7 transition hover:bg-white/10"
 
-          </div>
+>
 
+<div className="text-3xl">
 
+{servico.icon}
 
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
+</div>
 
+<h3 className="mt-6 text-xl font-bold text-white">
 
+{servico.title}
 
-            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+</h3>
 
+<p className="mt-3 text-sm leading-6 text-gray-300">
 
+{servico.text}
 
-              <div className="flex aspect-[16/8] items-center justify-center bg-[#36B970]/10">
+</p>
 
+</div>
 
+))}
 
-                <div className="text-center">
+</div>
 
+<div className="mt-10 text-center">
 
+<a
 
-                  <div className="text-5xl">🎁</div>
+href="/servicos"
 
+className="inline-flex rounded-xl bg-[#36B970] px-7 py-3 font-extrabold text-[#173690] transition hover:bg-[#36B970]/90"
 
+>
 
-                  <p className="mt-3 font-bold text-[#173690]">
+Ver todos os serviços
 
-                    Espaço para promoção
+</a>
 
-                  </p>
+</div>
 
+</div>
 
+</section>
 
-                </div>
+{/* =====================================================**
 
+**          PROMOÇÕES**
 
+**      ====================================================== */}
 
-              </div>
+<section className="px-5 py-20 sm:px-6 lg:px-8">
 
+<div className="mx-auto max-w-7xl">
 
+<div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
 
-              <div className="p-7">
+<div>
 
+<span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
 
+  Promoções
 
-                <span className="text-xs font-bold uppercase tracking-wider text-[#36B970]">
+</span>
 
-                  Promoção
+<h2 className="mt-3 text-3xl font-black text-[#173690] sm:text-4xl">
 
-                </span>
+  Promoções e sorteios
 
+</h2>
 
+</div>
 
-                <h3 className="mt-2 text-2xl font-black">
+<a
 
-                  Título da promoção
+href="/promocoes"
 
-                </h3>
+className="font-bold text-[#36B970] hover:text-[#36B970]"
 
+>
 
+Ver todas →
 
-                <p className="mt-3 leading-6 text-gray-600">
+</a>
 
-                  Este conteúdo será substituído posteriormente pelo
+</div>
 
-                  administrador.
+<div className="mt-10 grid gap-6 md:grid-cols-2">
 
-                </p>
+<div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
 
+<div className="flex aspect-[16/8] items-center justify-center bg-[#36B970]/10">
 
+<div className="text-center">
 
-                <a
+  <div className="text-5xl">🎁</div>
 
-                  href="/promocoes"
+  <p className="mt-3 font-bold text-[#173690]">
 
-                  className="mt-5 inline-block font-bold text-[#36B970]"
+    Espaço para promoção
 
-                >
+  </p>
 
-                  Ver detalhes →
+</div>
 
-                </a>
+</div>
 
+<div className="p-7">
 
+<span className="text-xs font-bold uppercase tracking-wider text-[#36B970]">
 
-              </div>
+  Promoção
 
-            </div>
+</span>
 
+<h3 className="mt-2 text-2xl font-black">
 
+  Título da promoção
 
-            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+</h3>
 
+<p className="mt-3 leading-6 text-gray-600">
 
+  Este conteúdo será substituído posteriormente pelo
 
-              <div className="flex aspect-[16/8] items-center justify-center bg-[#36B970]/10">
+  administrador.
 
+</p>
 
+<a
 
-                <div className="text-center">
+href="/promocoes"
 
+className="mt-5 inline-block font-bold text-[#36B970]"
 
+>
 
-                  <div className="text-5xl">🏆</div>
+Ver detalhes →
 
+</a>
 
+</div>
 
-                  <p className="mt-3 font-bold text-[#173690]">
+</div>
 
-                    Espaço para sorteio
+<div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
 
-                  </p>
+<div className="flex aspect-[16/8] items-center justify-center bg-[#36B970]/10">
 
+<div className="text-center">
 
+<div className="text-5xl">🏆</div>
 
-                </div>
+<p className="mt-3 font-bold text-[#173690]">
 
+  Espaço para sorteio
 
+</p>
 
-              </div>
+</div>
 
+</div>
 
+<div className="p-7">
 
-              <div className="p-7">
+<span className="text-xs font-bold uppercase tracking-wider text-[#36B970]">
 
+Sorteio
 
+</span>
 
-                <span className="text-xs font-bold uppercase tracking-wider text-[#36B970]">
+<h3 className="mt-2 text-2xl font-black">
 
-                  Sorteio
+Título do sorteio
 
-                </span>
+</h3>
 
+<p className="mt-3 leading-6 text-gray-600">
 
+Este conteúdo será substituído posteriormente pelo
 
-                <h3 className="mt-2 text-2xl font-black">
+administrador.
 
-                  Título do sorteio
+</p>
 
-                </h3>
+<a
 
+href="/promocoes"
 
+className="mt-5 inline-block font-bold text-[#36B970]"
 
-                <p className="mt-3 leading-6 text-gray-600">
+>
 
-                  Este conteúdo será substituído posteriormente pelo
+Ver detalhes →
 
-                  administrador.
+</a>
 
-                </p>
+</div>
 
+</div>
 
+</div>
 
-                <a
+</div>
 
-                  href="/promocoes"
+</section>
 
-                  className="mt-5 inline-block font-bold text-[#36B970]"
+{/* =====================================================**
 
-                >
+**          GALERIA**
 
-                  Ver detalhes →
+**      ====================================================== */}
 
-                </a>
+<section className="bg-gray-50 px-5 py-20 sm:px-6 lg:px-8">
 
+<div className="mx-auto max-w-7xl">
 
+<div className="text-center">
 
-              </div>
+<span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
 
-            </div>
+Galeria
 
+</span>
 
+<h2 className="mt-3 text-3xl font-black text-[#173690] sm:text-4xl">
 
-          </div>
+Conheça nossa estrutura
 
-        </div>
+</h2>
 
-      </section>
+<p className="mx-auto mt-4 max-w-2xl leading-7 text-gray-600">
 
+As fotos reais poderão ser adicionadas posteriormente pelo
 
+administrador.
 
-      {/** =====================================================*
+</p>
 
-*          GALERIA*
+</div>
 
-*      ====================================================== */}
+<div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
 
+{[
 
+"Foto 01",
 
-      <section className="bg-gray-50 px-5 py-20 sm:px-6 lg:px-8">
+"Foto 02",
 
-        <div className="mx-auto max-w-7xl">
+"Foto 03",
 
+"Foto 04",
 
+].map((foto) => (
 
-          <div className="text-center">
+<div
 
+key={foto}
 
+className="flex aspect-square items-center justify-center rounded-2xl bg-gray-200 text-center"
 
-            <span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
+>
 
-              Galeria
+<div>
 
-            </span>
+<div className="text-3xl">📷</div>
 
+<p className="mt-2 text-sm font-semibold text-gray-500">
 
+{foto}
 
-            <h2 className="mt-3 text-3xl font-black text-[#173690] sm:text-4xl">
+</p>
 
-              Conheça nossa estrutura
+</div>
 
-            </h2>
+</div>
 
+))}
 
+</div>
 
-            <p className="mx-auto mt-4 max-w-2xl leading-7 text-gray-600">
+<div className="mt-10 text-center">
 
-              As fotos reais poderão ser adicionadas posteriormente pelo
+<a
 
-              administrador.
+href="/galeria"
 
-            </p>
+className="inline-flex rounded-xl border-2 border-[#36B970] px-7 py-3 font-bold text-[#36B970] transition hover:bg-[#173690] hover:text-white"
 
+>
 
+Ver galeria completa
 
-          </div>
+</a>
 
+</div>
 
+</div>
 
-          <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+</section>
 
+{/* =====================================================**
 
+**          LOCALIZAÇÃO / CONTATO**
 
-            {[
+**      ====================================================== */}
 
-              "Foto 01",
+<section className="px-5 py-20 sm:px-6 lg:px-8">
 
-              "Foto 02",
+<div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
 
-              "Foto 03",
+<div className="rounded-3xl bg-[#173690] p-8 sm:p-10">
 
-              "Foto 04",
+<span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
 
-            ].map((foto) => (
+Localização
 
-              <div
+</span>
 
-                key={foto}
+<h2 className="mt-3 text-3xl font-black text-white">
 
-                className="flex aspect-square items-center justify-center rounded-2xl bg-gray-200 text-center"
+Como chegar
 
-              >
+</h2>
 
-                <div>
+<p className="mt-5 leading-7 text-gray-300">
 
+O endereço, telefone, WhatsApp e demais informações serão
 
+cadastrados posteriormente pelo painel administrativo.
 
-                  <div className="text-3xl">📷</div>
+</p>
 
+<div className="mt-8 space-y-5">
 
+<div>
 
-                  <p className="mt-2 text-sm font-semibold text-gray-500">
+  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
 
-                    {foto}
+    Endereço
 
-                  </p>
+  </p>
 
+  <p className="mt-1 font-semibold text-white">
 
+    Endereço do Posto Gasparin
 
-                </div>
+  </p>
 
-              </div>
+</div>
 
-            ))}
+<div>
 
+  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
 
+    Telefone
 
-          </div>
+  </p>
 
+  <p className="mt-1 font-semibold text-white">
 
+    (00) 0000-0000
 
-          <div className="mt-10 text-center">
+  </p>
 
+</div>
 
+<div>
 
-            <a
+  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
 
-              href="/galeria"
+    WhatsApp
 
-              className="inline-flex rounded-xl border-2 border-[#36B970] px-7 py-3 font-bold text-[#36B970] transition hover:bg-[#173690] hover:text-white"
+  </p>
 
-            >
+  <p className="mt-1 font-semibold text-white">
 
-              Ver galeria completa
+    (00) 00000-0000
 
-            </a>
+  </p>
 
+</div>
 
+</div>
 
-          </div>
+<a
 
+href="/contato"
 
+className="mt-8 inline-flex rounded-xl bg-[#36B970] px-6 py-3 font-extrabold text-[#173690] transition hover:bg-[#36B970]/90"
 
-        </div>
+>
 
-      </section>
+Ver informações de contato
 
+</a>
 
+</div>
 
-      {/** =====================================================*
+{/* MAPA PLACEHOLDER */}
 
-*          LOCALIZAÇÃO / CONTATO*
+<div className="flex min-h-[400px] items-center justify-center rounded-3xl bg-gray-100 p-8">
 
-*      ====================================================== */}
+<div className="text-center">
 
+<div className="text-6xl">📍</div>
 
+<h3 className="mt-5 text-2xl font-black text-gray-900">
 
-      <section className="px-5 py-20 sm:px-6 lg:px-8">
+Mapa
 
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
+</h3>
 
+<p className="mx-auto mt-3 max-w-sm leading-6 text-gray-600">
 
+O mapa real será configurado posteriormente com a localização
 
-          <div className="rounded-3xl bg-[#173690] p-8 sm:p-10">
+oficial do posto.
 
+</p>
 
+</div>
 
-            <span className="text-sm font-extrabold uppercase tracking-wider text-[#36B970]">
+</div>
 
-              Localização
+</div>
 
-            </span>
+</section>
 
+{/* =====================================================**
 
+**          CTA**
 
-            <h2 className="mt-3 text-3xl font-black text-white">
+**      ====================================================== */}
 
-              Como chegar
+<section className="bg-[#36B970] px-5 py-16 sm:px-6 lg:px-8">
 
-            </h2>
+<div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-7 text-center lg:flex-row lg:text-left">
 
+<div>
 
+<h2 className="text-3xl font-black text-[#173690]">
 
-            <p className="mt-5 leading-7 text-gray-300">
+Precisa falar com o Posto Gasparin?
 
-              O endereço, telefone, WhatsApp e demais informações serão
+</h2>
 
-              cadastrados posteriormente pelo painel administrativo.
+<p className="mt-2 text-gray-800">
 
-            </p>
+Entre em contato através dos nossos canais.
 
+</p>
 
+</div>
 
-            <div className="mt-8 space-y-5">
+<a
 
+href="/contato"
 
+className="rounded-xl bg-[#173690] px-8 py-4 font-extrabold text-white transition hover:bg-[#173690]"
 
-              <div>
+>
 
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
+Entrar em contato
 
-                  Endereço
+</a>
 
-                </p>
+</div>
 
+</section>
 
+{/* =====================================================**
 
-                <p className="mt-1 font-semibold text-white">
+**          RODAPÉ**
 
-                  Endereço do Posto Gasparin
+**      ====================================================== */}
 
-                </p>
+<footer className="bg-[#173690] px-5 py-12 text-white sm:px-6 lg:px-8">
 
-              </div>
+<div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3">
 
+<div>
 
+<div className="flex items-center gap-3">
 
-              <div>
+<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#36B970] font-black">
 
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
+PG
 
-                  Telefone
+</div>
 
-                </p>
+<div>
 
+<h3 className="font-extrabold">
 
+Posto Gasparin
 
-                <p className="mt-1 font-semibold text-white">
+</h3>
 
-                  (00) 0000-0000
+<p className="text-xs text-gray-400">
 
-                </p>
+Grupo Potencial
 
-              </div>
+</p>
 
+</div>
 
+</div>
 
-              <div>
+<p className="mt-5 max-w-sm text-sm leading-6 text-gray-400">
 
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
+Site institucional do Posto Gasparin. Informações apresentadas
 
-                  WhatsApp
+nesta versão são provisórias.
 
-                </p>
+</p>
 
+</div>
 
+<div>
 
-                <p className="mt-1 font-semibold text-white">
+<h3 className="font-bold">
 
-                  (00) 00000-0000
+Navegação
 
-                </p>
+</h3>
 
-              </div>
+<div className="mt-4 flex flex-col gap-3 text-sm text-gray-400">
 
+<a href="/" className="hover:text-white">
 
+Início
 
-            </div>
+</a>
 
+<a href="/o-posto" className="hover:text-white">
 
+O Posto
 
-            <a
+</a>
 
-              href="/contato"
+<a href="/servicos" className="hover:text-white">
 
-              className="mt-8 inline-flex rounded-xl bg-[#36B970] px-6 py-3 font-extrabold text-[#173690] transition hover:bg-[#36B970]/90"
+Serviços
 
-            >
+</a>
 
-              Ver informações de contato
+<a href="/galeria" className="hover:text-white">
 
-            </a>
+Galeria
 
+</a>
 
+<a href="/promocoes" className="hover:text-white">
 
-          </div>
+Promoções
 
+</a>
 
+<a href="/contato" className="hover:text-white">
 
-          {/** MAPA PLACEHOLDER */}
+Contato
 
+</a>
 
+<a
 
-          <div className="flex min-h-[400px] items-center justify-center rounded-3xl bg-gray-100 p-8">
+href="/admin/login"
 
+className="mt-2 inline-flex w-fit rounded-lg bg-[#36B970] px-4 py-2 font-semibold text-[#173690] transition hover:bg-[#36B970]/90"
 
+>
 
-            <div className="text-center">
+Login
 
+</a>
 
+</div>
 
-              <div className="text-6xl">📍</div>
+</div>
 
+<div>
 
+<h3 className="font-bold">
 
-              <h3 className="mt-5 text-2xl font-black text-gray-900">
+Contato
 
-                Mapa
+</h3>
 
-              </h3>
+<div className="mt-4 space-y-3 text-sm text-gray-400">
 
+<p>Telefone: (00) 0000-0000</p>
 
+<p>WhatsApp: (00) 00000-0000</p>
 
-              <p className="mx-auto mt-3 max-w-sm leading-6 text-gray-600">
+<p>Endereço: informação provisória</p>
 
-                O mapa real será configurado posteriormente com a localização
+</div>
 
-                oficial do posto.
+</div>
 
-              </p>
+</div>
 
+<div className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-6 text-center text-xs text-gray-500">
 
+© {new Date().getFullYear()} Posto Gasparin. Todos os direitos
 
-            </div>
+reservados.
 
+</div>
 
+</footer>
 
-          </div>
+</main>
 
-
-
-        </div>
-
-      </section>
-
-
-
-      {/** =====================================================*
-
-*          CTA*
-
-*      ====================================================== */}
-
-
-
-      <section className="bg-[#36B970] px-5 py-16 sm:px-6 lg:px-8">
-
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-7 text-center lg:flex-row lg:text-left">
-
-
-
-          <div>
-
-
-
-            <h2 className="text-3xl font-black text-[#173690]">
-
-              Precisa falar com o Posto Gasparin?
-
-            </h2>
-
-
-
-            <p className="mt-2 text-gray-800">
-
-              Entre em contato através dos nossos canais.
-
-            </p>
-
-
-
-          </div>
-
-
-
-          <a
-
-            href="/contato"
-
-            className="rounded-xl bg-[#173690] px-8 py-4 font-extrabold text-white transition hover:bg-[#173690]"
-
-          >
-
-            Entrar em contato
-
-          </a>
-
-
-
-        </div>
-
-      </section>
-
-
-
-      {/** =====================================================*
-
-*          RODAPÉ*
-
-*      ====================================================== */}
-
-
-
-      <footer className="bg-[#173690] px-5 py-12 text-white sm:px-6 lg:px-8">
-
-
-
-        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3">
-
-
-
-          <div>
-
-
-
-            <div className="flex items-center gap-3">
-
-
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#36B970] font-black">
-
-                PG
-
-              </div>
-
-
-
-              <div>
-
-
-
-                <h3 className="font-extrabold">
-
-                  Posto Gasparin
-
-                </h3>
-
-
-
-                <p className="text-xs text-gray-400">
-
-                  Grupo Potencial
-
-                </p>
-
-
-
-              </div>
-
-
-
-            </div>
-
-
-
-            <p className="mt-5 max-w-sm text-sm leading-6 text-gray-400">
-
-              Site institucional do Posto Gasparin. Informações apresentadas
-
-              nesta versão são provisórias.
-
-            </p>
-
-
-
-          </div>
-
-
-
-          <div>
-
-
-
-            <h3 className="font-bold">
-
-              Navegação
-
-            </h3>
-
-
-
-            <div className="mt-4 flex flex-col gap-3 text-sm text-gray-400">
-
-
-
-              <a href="/" className="hover:text-white">
-
-                Início
-
-              </a>
-
-
-
-              <a href="/o-posto" className="hover:text-white">
-
-                O Posto
-
-              </a>
-
-
-
-              <a href="/servicos" className="hover:text-white">
-
-                Serviços
-
-              </a>
-
-
-
-              <a href="/galeria" className="hover:text-white">
-
-                Galeria
-
-              </a>
-
-
-
-              <a href="/promocoes" className="hover:text-white">
-
-                Promoções
-
-              </a>
-
-
-
-              <a href="/contato" className="hover:text-white">
-
-                Contato
-
-              </a>
-
-
-
-              <a
-
-                href="/admin/login"
-
-                className="mt-2 inline-flex w-fit rounded-lg bg-[#36B970] px-4 py-2 font-semibold text-[#173690] transition hover:bg-[#36B970]/90"
-
-              >
-
-                Login
-
-              </a>
-
-
-
-            </div>
-
-
-
-          </div>
-
-
-
-          <div>
-
-
-
-            <h3 className="font-bold">
-
-              Contato
-
-            </h3>
-
-
-
-            <div className="mt-4 space-y-3 text-sm text-gray-400">
-
-
-
-              <p>Telefone: (00) 0000-0000</p>
-
-
-
-              <p>WhatsApp: (00) 00000-0000</p>
-
-
-
-              <p>Endereço: informação provisória</p>
-
-
-
-            </div>
-
-
-
-          </div>
-
-
-
-        </div>
-
-
-
-        <div className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-6 text-center text-xs text-gray-500">
-
-          © {new Date().getFullYear()} Posto Gasparin. Todos os direitos
-
-          reservados.
-
-        </div>
-
-
-
-      </footer>
-
-
-
-    </main>
-
-  );
+);
 
 }
