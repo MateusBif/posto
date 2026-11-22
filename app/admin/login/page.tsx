@@ -1,13 +1,18 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginAdmin() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setErro("");
@@ -17,14 +22,55 @@ export default function LoginAdmin() {
       return;
     }
 
-    // Login provisório.
-    // A autenticação real será conectada posteriormente.
-    if (email === "admin@postogasparin.com.br" && senha === "123456") {
-      window.location.href = "/admin/dashboard";
-      return;
-    }
+    setCarregando(true);
 
-    setErro("E-mail ou senha inválidos.");
+    const supabase = createClient();
+
+    try {
+      // 1. Autenticar no Supabase
+      const { data: authData, error: authError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
+      if (authError) {
+        setErro("E-mail ou senha inválidos.");
+        setCarregando(false);
+        return;
+      }
+
+      // 2. Verificar se o usuário possui perfil autorizado
+      const { data: perfil, error: perfilError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", authData.user.id)
+        .single();
+
+      if (perfilError || !perfil) {
+        await supabase.auth.signOut();
+
+        setErro("Usuário sem perfil administrativo cadastrado.");
+        setCarregando(false);
+        return;
+      }
+
+      // 3. Verificar permissão
+      if (perfil.role !== "admin" && perfil.role !== "editor") {
+        await supabase.auth.signOut();
+
+        setErro("Você não possui autorização para acessar o painel.");
+        setCarregando(false);
+        return;
+      }
+
+      // 4. Login autorizado
+      router.push("/admin/dashboard");
+      router.refresh();
+    } catch {
+      setErro("Ocorreu um erro inesperado. Tente novamente.");
+      setCarregando(false);
+    }
   }
 
   return (
@@ -89,7 +135,10 @@ export default function LoginAdmin() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="Digite seu e-mail"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                autoComplete="email"
+                required
+                disabled={carregando}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
               />
             </div>
 
@@ -107,15 +156,19 @@ export default function LoginAdmin() {
                 value={senha}
                 onChange={(event) => setSenha(event.target.value)}
                 placeholder="Digite sua senha"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                autoComplete="current-password"
+                required
+                disabled={carregando}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#173690] px-5 py-3.5 font-bold text-white transition hover:bg-[#36b970]"
+              disabled={carregando}
+              className="w-full rounded-xl bg-[#173690] px-5 py-3.5 font-bold text-white transition hover:bg-[#36b970] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Entrar no painel
+              {carregando ? "Entrando..." : "Entrar no painel"}
             </button>
           </form>
 

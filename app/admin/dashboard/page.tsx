@@ -2,9 +2,30 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminDashboard() {
   const [menuAberto, setMenuAberto] = useState(false);
+  const [saindo, setSaindo] = useState(false);
+
+  // Logout real do Supabase
+  async function sair() {
+    if (saindo) return;
+
+    setSaindo(true);
+
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      alert("Não foi possível sair. Tente novamente.");
+      setSaindo(false);
+      return;
+    }
+
+    window.location.href = "/admin/login";
+  }
 
   const modulos = [
     {
@@ -64,12 +85,11 @@ export default function AdminDashboard() {
             </Link>
 
             <button
-              onClick={() => {
-                window.location.href = "/admin/login";
-              }}
-              className="rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white hover:bg-[#2fa864]"
+              onClick={sair}
+              disabled={saindo}
+              className="rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#2fa864] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Sair
+              {saindo ? "Saindo..." : "Sair"}
             </button>
           </nav>
 
@@ -77,28 +97,30 @@ export default function AdminDashboard() {
           <button
             onClick={() => setMenuAberto(!menuAberto)}
             className="text-2xl md:hidden"
+            aria-label="Abrir menu"
           >
             ☰
           </button>
         </div>
 
+        {/* MENU MOBILE ABERTO */}
         {menuAberto && (
           <div className="border-t border-white/20 px-6 py-4 md:hidden">
             <div className="flex flex-col gap-4">
               <Link
                 href="/"
                 className="text-sm font-medium hover:text-[#36b970]"
+                onClick={() => setMenuAberto(false)}
               >
                 Ver site
               </Link>
 
               <button
-                onClick={() => {
-                  window.location.href = "/admin/login";
-                }}
-                className="w-full rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white hover:bg-[#2fa864]"
+                onClick={sair}
+                disabled={saindo}
+                className="w-full rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#2fa864] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Sair
+                {saindo ? "Saindo..." : "Sair"}
               </button>
             </div>
           </div>
@@ -203,7 +225,7 @@ export default function AdminDashboard() {
               </p>
 
               <p className="mt-2 font-bold text-[#173690]">
-                ● Em configuração
+                ● Conectado
               </p>
             </div>
           </div>
