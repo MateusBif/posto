@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
@@ -16,8 +17,6 @@ type Foto = {
 };
 
 export default function AdminGaleria() {
-  const supabase = createClient();
-
   const [fotos, setFotos] = useState<Foto[]>([]);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -39,6 +38,8 @@ export default function AdminGaleria() {
   }, []);
 
   async function carregarFotos() {
+    const supabase = createClient();
+
     setCarregando(true);
 
     const { data, error } = await supabase
@@ -86,6 +87,8 @@ export default function AdminGaleria() {
   async function salvarFoto(event: FormEvent) {
     event.preventDefault();
 
+    const supabase = createClient();
+
     if (!titulo.trim()) {
       setMensagem("Preencha o título da foto.");
       return;
@@ -104,10 +107,10 @@ export default function AdminGaleria() {
     try {
       // Upload da imagem
       if (arquivo) {
-        const extensao = arquivo.name.split(".").pop()?.toLowerCase() || "jpg";
+        const extensao =
+          arquivo.name.split(".").pop()?.toLowerCase() || "jpg";
 
         const nomeArquivo = `galeria-${Date.now()}.${extensao}`;
-
         const caminho = `galeria/${nomeArquivo}`;
 
         const { error: uploadError } = await supabase.storage
@@ -200,6 +203,8 @@ export default function AdminGaleria() {
   }
 
   async function excluirFoto(id: string) {
+    const supabase = createClient();
+
     const confirmar = window.confirm(
       "Tem certeza que deseja excluir esta foto?"
     );
@@ -222,6 +227,8 @@ export default function AdminGaleria() {
   }
 
   async function alternarDestaque(foto: Foto) {
+    const supabase = createClient();
+
     const { error } = await supabase
       .from("gallery")
       .update({ destaque: !foto.destaque })
@@ -236,6 +243,8 @@ export default function AdminGaleria() {
   }
 
   async function alternarAtivo(foto: Foto) {
+    const supabase = createClient();
+
     const { error } = await supabase
       .from("gallery")
       .update({ ativo: !foto.ativo })
