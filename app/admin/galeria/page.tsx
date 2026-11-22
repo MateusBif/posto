@@ -1,7 +1,7 @@
 
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -16,6 +16,9 @@ type Foto = {
   ordem: number;
 };
 
+const TAMANHO_MAXIMO = 5 * 1024 * 1024;
+const BUCKET = "posto-gasparin-media";
+
 export default function AdminGaleria() {
   const [fotos, setFotos] = useState<Foto[]>([]);
   const [titulo, setTitulo] = useState("");
@@ -29,7 +32,7 @@ export default function AdminGaleria() {
   const [preview, setPreview] = useState("");
 
   const [editandoId, setEditandoId] = useState<string | null>(null);
-  const [carregando, setCarregando] = useState(false);
+  const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
 
@@ -38,27 +41,36 @@ export default function AdminGaleria() {
   }, []);
 
   async function carregarFotos() {
-    const supabase = createClient();
-
     setCarregando(true);
 
-    const { data, error } = await supabase
-      .from("gallery")
-      .select("*")
-      .order("destaque", { ascending: false })
-      .order("ordem", { ascending: true });
+    try {
+      const supabase = createClient();
 
-    if (error) {
-      setMensagem("Erro ao carregar fotos: " + error.message);
+      const { data, error } = await supabase
+        .from("gallery")
+        .select("*")
+        .order("destaque", { ascending: false })
+        .order("ordem", { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      setFotos(data ?? []);
+    } catch (error) {
+      console.error("Erro ao carregar fotos:", error);
+      setMensagem("Erro ao carregar fotos da galeria.");
       setFotos([]);
-    } else {
-      setFotos(data || []);
+    } finally {
+      setCarregando(false);
     }
-
-    setCarregando(false);
   }
 
   function limparFormulario() {
+    if (preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
+
     setTitulo("");
     setDescricao("");
     setCategoria("Estrutura");
@@ -73,21 +85,46 @@ export default function AdminGaleria() {
       "arquivo-imagem"
     ) as HTMLInputElement | null;
 
-    if (input) input.value = "";
-  }
-
-  function selecionarArquivo(file: File | null) {
-    setArquivo(file);
-
-    if (file) {
-      setPreview(URL.createObjectURL(file));
+    if (input) {
+      input.value = "";
     }
   }
 
-  async function salvarFoto(event: FormEvent) {
-    event.preventDefault();
+  function selecionarArquivo(file: File | null) {
+    if (preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
 
-    const supabase = createClient();
+    setArquivo(null);
+    setPreview("");
+
+    if (!file) {
+      return;
+    }
+
+    const tiposPermitidos = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!tiposPermitidos.includes(file.type)) {
+      setMensagem("Formato inválido. Utilize JPG, PNG ou WEBP.");
+      return;
+    }
+
+    if (file.size > TAMANHO_MAXIMO) {
+      setMensagem("A imagem deve ter no máximo 5 MB.");
+      return;
+    }
+
+    setMensagem("");
+    setArquivo(file);
+    setPreview(URL.createObjectURL(file));
+  }
+
+  async function salvarFoto(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
     if (!titulo.trim()) {
       setMensagem("Preencha o título da foto.");
@@ -102,49 +139,55 @@ export default function AdminGaleria() {
     setSalvando(true);
     setMensagem("");
 
-    let imagemUrl = preview;
-
     try {
+      const supabase = createClient();
+
+      let imagemUrl = preview;
+
       // Upload da imagem
       if (arquivo) {
-        const extensao =
-          arquivo.name.split(".").pop()?.toLowerCase() || "jpg";
+        const extensao = arquivo.name
+          .split(".")
+          .pop()
+          ?.toLowerCase() || "jpg";
 
         const nomeArquivo = `galeria-${Date.now()}.${extensao}`;
         const caminho = `galeria/${nomeArquivo}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("posto-gasparin-media")
+          .from(BUCKET)
           .upload(caminho, arquivo, {
             cacheControl: "3600",
             upsert: false,
           });
 
         if (uploadError) {
-          throw new Error("Erro no upload: " + uploadError.message);
+          throw new Error(
+            "Erro no upload da imagem: " + uploadError.message
+          );
         }
 
         const { data: urlData } = supabase.storage
-          .from("posto-gasparin-media")
+          .from(BUCKET)
           .getPublicUrl(caminho);
 
         imagemUrl = urlData.publicUrl;
       }
 
+      const dados = {
+        titulo: titulo.trim(),
+        descricao: descricao.trim() || null,
+        categoria,
+        destaque,
+        ativo,
+        ordem,
+      };
+
       // Atualizar foto existente
       if (editandoId) {
-        const dadosAtualizacao: Record<string, unknown> = {
-          titulo: titulo.trim(),
-          descricao: descricao.trim(),
-          categoria,
-          destaque,
-          ativo,
-          ordem,
-        };
-
-        if (arquivo) {
-          dadosAtualizacao.imagem_url = imagemUrl;
-        }
+        const dadosAtualizacao = arquivo
+          ? { ...dados, imagem_url: imagemUrl }
+          : dados;
 
         const { error } = await supabase
           .from("gallery")
@@ -152,24 +195,21 @@ export default function AdminGaleria() {
           .eq("id", editandoId);
 
         if (error) {
-          throw new Error(error.message);
+          throw error;
         }
 
         setMensagem("Foto atualizada com sucesso!");
       } else {
         // Cadastrar nova foto
-        const { error } = await supabase.from("gallery").insert({
-          titulo: titulo.trim(),
-          descricao: descricao.trim(),
-          categoria,
-          imagem_url: imagemUrl,
-          destaque,
-          ativo,
-          ordem,
-        });
+        const { error } = await supabase
+          .from("gallery")
+          .insert({
+            ...dados,
+            imagem_url: imagemUrl,
+          });
 
         if (error) {
-          throw new Error(error.message);
+          throw error;
         }
 
         setMensagem("Foto cadastrada com sucesso!");
@@ -178,14 +218,24 @@ export default function AdminGaleria() {
       limparFormulario();
       await carregarFotos();
     } catch (error) {
-      const erro = error as Error;
-      setMensagem("Erro ao salvar: " + erro.message);
-    }
+      console.error("Erro ao salvar foto:", error);
 
-    setSalvando(false);
+      const erro =
+        error instanceof Error
+          ? error.message
+          : "Erro desconhecido.";
+
+      setMensagem("Erro ao salvar: " + erro);
+    } finally {
+      setSalvando(false);
+    }
   }
 
   function editarFoto(foto: Foto) {
+    if (preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
+
     setTitulo(foto.titulo);
     setDescricao(foto.descricao || "");
     setCategoria(foto.categoria || "Estrutura");
@@ -195,6 +245,15 @@ export default function AdminGaleria() {
     setPreview(foto.imagem_url);
     setArquivo(null);
     setEditandoId(foto.id);
+    setMensagem("");
+
+    const input = document.getElementById(
+      "arquivo-imagem"
+    ) as HTMLInputElement | null;
+
+    if (input) {
+      input.value = "";
+    }
 
     window.scrollTo({
       top: 0,
@@ -203,66 +262,103 @@ export default function AdminGaleria() {
   }
 
   async function excluirFoto(id: string) {
-    const supabase = createClient();
-
     const confirmar = window.confirm(
       "Tem certeza que deseja excluir esta foto?"
     );
 
-    if (!confirmar) return;
-
-    const { error } = await supabase
-      .from("gallery")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      setMensagem("Erro ao excluir: " + error.message);
+    if (!confirmar) {
       return;
     }
 
-    setMensagem("Foto excluída com sucesso!");
+    try {
+      const supabase = createClient();
 
-    await carregarFotos();
+      const { error } = await supabase
+        .from("gallery")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+
+      setMensagem("Foto excluída com sucesso!");
+
+      if (editandoId === id) {
+        limparFormulario();
+      }
+
+      await carregarFotos();
+    } catch (error) {
+      console.error("Erro ao excluir foto:", error);
+
+      const erro =
+        error instanceof Error
+          ? error.message
+          : "Erro desconhecido.";
+
+      setMensagem("Erro ao excluir: " + erro);
+    }
   }
 
   async function alternarDestaque(foto: Foto) {
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const { error } = await supabase
-      .from("gallery")
-      .update({ destaque: !foto.destaque })
-      .eq("id", foto.id);
+      const { error } = await supabase
+        .from("gallery")
+        .update({ destaque: !foto.destaque })
+        .eq("id", foto.id);
 
-    if (error) {
-      setMensagem("Erro ao alterar destaque: " + error.message);
-      return;
+      if (error) {
+        throw error;
+      }
+
+      setMensagem(
+        foto.destaque
+          ? "Destaque removido."
+          : "Foto marcada como destaque."
+      );
+
+      await carregarFotos();
+    } catch (error) {
+      console.error("Erro ao alterar destaque:", error);
+      setMensagem("Erro ao alterar destaque.");
     }
-
-    await carregarFotos();
   }
 
   async function alternarAtivo(foto: Foto) {
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const { error } = await supabase
-      .from("gallery")
-      .update({ ativo: !foto.ativo })
-      .eq("id", foto.id);
+      const { error } = await supabase
+        .from("gallery")
+        .update({ ativo: !foto.ativo })
+        .eq("id", foto.id);
 
-    if (error) {
-      setMensagem("Erro ao alterar status: " + error.message);
-      return;
+      if (error) {
+        throw error;
+      }
+
+      setMensagem(
+        foto.ativo
+          ? "Foto desativada."
+          : "Foto ativada."
+      );
+
+      await carregarFotos();
+    } catch (error) {
+      console.error("Erro ao alterar status:", error);
+      setMensagem("Erro ao alterar status da foto.");
     }
-
-    await carregarFotos();
   }
 
   return (
     <main className="min-h-screen bg-gray-100">
+
       {/* HEADER */}
       <header className="bg-[#173690] text-white shadow-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6">
           <div>
             <h1 className="text-2xl font-bold">
               Posto Gasparin
@@ -273,10 +369,10 @@ export default function AdminGaleria() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/admin/dashboard"
-              className="rounded-lg border border-[#36b970] px-4 py-2 text-sm font-semibold transition hover:bg-[#36b970]"
+              className="rounded-lg border border-[#36b970] px-3 py-2 text-sm font-semibold transition hover:bg-[#36b970] sm:px-4"
             >
               ← Dashboard
             </Link>
@@ -292,7 +388,9 @@ export default function AdminGaleria() {
       </header>
 
       {/* CONTEÚDO */}
-      <section className="mx-auto max-w-6xl px-6 py-10">
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+
+        {/* TÍTULO */}
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#36b970]">
             Administração
@@ -318,7 +416,8 @@ export default function AdminGaleria() {
         )}
 
         {/* FORMULÁRIO */}
-        <section className="mb-10 rounded-2xl bg-white p-6 shadow-sm">
+        <section className="mb-10 rounded-2xl bg-white p-5 shadow-sm sm:p-6">
+
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h3 className="text-xl font-bold text-[#173690]">
@@ -345,6 +444,7 @@ export default function AdminGaleria() {
             onSubmit={salvarFoto}
             className="mt-6 space-y-5"
           >
+
             {/* TÍTULO */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -356,6 +456,8 @@ export default function AdminGaleria() {
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ex.: Área externa"
+                maxLength={150}
+                required
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
               />
             </div>
@@ -371,6 +473,7 @@ export default function AdminGaleria() {
                 onChange={(e) => setDescricao(e.target.value)}
                 placeholder="Descrição da imagem..."
                 rows={3}
+                maxLength={1000}
                 className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
               />
             </div>
@@ -405,7 +508,7 @@ export default function AdminGaleria() {
               <input
                 id="arquivo-imagem"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={(e) =>
                   selecionarArquivo(e.target.files?.[0] || null)
                 }
@@ -413,8 +516,7 @@ export default function AdminGaleria() {
               />
 
               <p className="mt-2 text-xs text-gray-500">
-                Envie uma imagem JPG, PNG ou WEBP. Recomendamos imagens
-                com boa resolução.
+                JPG, PNG ou WEBP. Tamanho máximo: 5 MB.
               </p>
             </div>
 
@@ -428,7 +530,7 @@ export default function AdminGaleria() {
                 <div className="overflow-hidden rounded-xl border border-gray-200">
                   <img
                     src={preview}
-                    alt={titulo || "Pré-visualização"}
+                    alt={titulo || "Pré-visualização da imagem"}
                     className="h-64 w-full object-cover"
                   />
                 </div>
@@ -508,11 +610,13 @@ export default function AdminGaleria() {
                     : "➕ Cadastrar foto"}
               </button>
             </div>
+
           </form>
         </section>
 
         {/* FOTOS CADASTRADAS */}
         <section>
+
           <div className="mb-5">
             <h3 className="text-xl font-bold text-[#173690]">
               Fotos cadastradas
@@ -551,6 +655,7 @@ export default function AdminGaleria() {
                   key={foto.id}
                   className="overflow-hidden rounded-2xl bg-white shadow-sm"
                 >
+
                   {/* IMAGEM */}
                   <div className="relative">
                     <img
@@ -592,6 +697,7 @@ export default function AdminGaleria() {
 
                     {/* AÇÕES */}
                     <div className="mt-5 grid gap-2">
+
                       <button
                         type="button"
                         onClick={() => editarFoto(foto)}
@@ -627,6 +733,7 @@ export default function AdminGaleria() {
                       >
                         🗑️ Excluir
                       </button>
+
                     </div>
                   </div>
                 </article>
@@ -638,7 +745,9 @@ export default function AdminGaleria() {
 
       {/* FOOTER */}
       <footer className="mt-10 bg-[#173690] px-6 py-8 text-center text-sm text-white/80">
-        <p>Painel Administrativo — Posto Gasparin</p>
+        <p>
+          Painel Administrativo — Posto Gasparin
+        </p>
 
         <p className="mt-1 text-[#36b970]">
           Gerenciamento da galeria

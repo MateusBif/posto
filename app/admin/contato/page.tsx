@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type Contato = {
@@ -29,6 +28,7 @@ export default function AdminContatoPage() {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
 
+  // Carregar informações do banco
   useEffect(() => {
     async function carregarContato() {
       try {
@@ -47,17 +47,20 @@ export default function AdminContatoPage() {
         if (data) {
           setContato({
             id: data.id,
-            telefone: data.telefone || "",
-            whatsapp: data.whatsapp || "",
-            email: data.email || "",
-            endereco: data.endereco || "",
-            horario: data.horario || "",
-            mapa: data.mapa || "",
+            telefone: data.telefone ?? "",
+            whatsapp: data.whatsapp ?? "",
+            email: data.email ?? "",
+            endereco: data.endereco ?? "",
+            horario: data.horario ?? "",
+            mapa: data.mapa ?? "",
           });
         }
       } catch (error) {
         console.error("Erro ao carregar contato:", error);
-        setMensagem("Erro ao carregar os dados de contato.");
+
+        setMensagem(
+          "Erro ao carregar os dados de contato. Verifique sua conexão."
+        );
       } finally {
         setCarregando(false);
       }
@@ -66,6 +69,7 @@ export default function AdminContatoPage() {
     carregarContato();
   }, []);
 
+  // Atualizar campos
   function atualizarCampo(
     campo: keyof Contato,
     valor: string
@@ -76,7 +80,8 @@ export default function AdminContatoPage() {
     }));
   }
 
-  async function salvarContato(e: React.FormEvent) {
+  // Salvar informações
+  async function salvarContato(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     setSalvando(true);
@@ -95,41 +100,49 @@ export default function AdminContatoPage() {
         updated_at: new Date().toISOString(),
       };
 
-      let resultado;
-
       if (contato.id) {
-        resultado = await supabase
+        // Atualizar registro existente
+        const { error } = await supabase
           .from("contact_info")
           .update(dados)
           .eq("id", contato.id);
+
+        if (error) {
+          throw error;
+        }
       } else {
-        resultado = await supabase
+        // Criar novo registro
+        const { data, error } = await supabase
           .from("contact_info")
           .insert(dados)
           .select()
           .single();
-      }
 
-      if (resultado.error) {
-        throw resultado.error;
-      }
+        if (error) {
+          throw error;
+        }
 
-      if (resultado.data) {
-        setContato((prev) => ({
-          ...prev,
-          id: resultado.data.id,
-        }));
+        if (data) {
+          setContato((prev) => ({
+            ...prev,
+            id: data.id,
+          }));
+        }
       }
 
       setMensagem("Informações de contato salvas com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar contato:", error);
-      setMensagem("Erro ao salvar. Verifique os dados e tente novamente.");
+
+      setMensagem(
+        "Erro ao salvar. Verifique os dados e tente novamente."
+      );
     } finally {
       setSalvando(false);
     }
   }
 
+  // Tela de carregamento
   if (carregando) {
     return (
       <div className="min-h-screen bg-gray-100 p-6">
@@ -144,10 +157,12 @@ export default function AdminContatoPage() {
     );
   }
 
+  // Página principal
   return (
     <main className="min-h-screen bg-gray-100 p-4 md:p-8">
       <div className="mx-auto max-w-5xl">
 
+        {/* Cabeçalho */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#173690]">
             Informações de Contato
@@ -159,13 +174,16 @@ export default function AdminContatoPage() {
           </p>
         </div>
 
+        {/* Formulário */}
         <form
           onSubmit={salvarContato}
           className="space-y-6 rounded-xl bg-white p-5 shadow-md md:p-8"
         >
 
+          {/* Telefone, WhatsApp, Email e Endereço */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
+            {/* Telefone */}
             <div>
               <label className="mb-2 block font-medium text-gray-700">
                 Telefone
@@ -182,6 +200,7 @@ export default function AdminContatoPage() {
               />
             </div>
 
+            {/* WhatsApp */}
             <div>
               <label className="mb-2 block font-medium text-gray-700">
                 WhatsApp
@@ -198,6 +217,7 @@ export default function AdminContatoPage() {
               />
             </div>
 
+            {/* E-mail */}
             <div>
               <label className="mb-2 block font-medium text-gray-700">
                 E-mail
@@ -214,6 +234,7 @@ export default function AdminContatoPage() {
               />
             </div>
 
+            {/* Endereço */}
             <div>
               <label className="mb-2 block font-medium text-gray-700">
                 Endereço
@@ -232,6 +253,7 @@ export default function AdminContatoPage() {
 
           </div>
 
+          {/* Horário de funcionamento */}
           <div>
             <label className="mb-2 block font-medium text-gray-700">
               Horário de funcionamento
@@ -248,6 +270,7 @@ export default function AdminContatoPage() {
             />
           </div>
 
+          {/* Google Maps */}
           <div>
             <label className="mb-2 block font-medium text-gray-700">
               Link do Google Maps
@@ -269,6 +292,7 @@ export default function AdminContatoPage() {
             </p>
           </div>
 
+          {/* Mensagem */}
           {mensagem && (
             <div
               className={`rounded-lg p-4 ${
@@ -281,20 +305,20 @@ export default function AdminContatoPage() {
             </div>
           )}
 
+          {/* Botão salvar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-
             <button
               type="submit"
               disabled={salvando}
               className="rounded-lg bg-[#173690] px-6 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {salvando ? "Salvando..." : "Salvar informações"}
+              {salvando
+                ? "Salvando..."
+                : "Salvar informações"}
             </button>
-
           </div>
 
         </form>
-
       </div>
     </main>
   );

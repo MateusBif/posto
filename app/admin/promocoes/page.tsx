@@ -1,6 +1,7 @@
+
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -15,11 +16,19 @@ type Promocao = {
   regulamento: string | null;
   ativo: boolean;
   destaque: boolean;
+  created_at?: string;
 };
 
-export default function AdminPromocoes() {
-  const supabase = createClient();
+const BUCKET = "posto-gasparin-media";
+const LIMITE_IMAGEM = 5 * 1024 * 1024;
 
+const TIPOS_PERMITIDOS = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+
+export default function AdminPromocoes() {
   const [promocoes, setPromocoes] = useState<Promocao[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -45,27 +54,43 @@ export default function AdminPromocoes() {
   // =====================================================
 
   async function carregarPromocoes() {
-    setCarregando(true);
+    const supabase = createClient();
 
-    const { data, error } = await supabase
-      .from("promotions")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("promotions")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Erro ao carregar promoções:", error);
-      setMensagem("Erro ao carregar promoções.");
+      if (error) {
+        console.error("Erro ao carregar promoções:", error);
+        setMensagem("Não foi possível carregar as promoções.");
+        setErro(true);
+        return;
+      }
+
+      setPromocoes((data || []) as Promocao[]);
+    } catch (error) {
+      console.error("Erro inesperado:", error);
+      setMensagem("Ocorreu um erro ao carregar as promoções.");
       setErro(true);
-    } else {
-      setPromocoes(data || []);
+    } finally {
+      setCarregando(false);
     }
-
-    setCarregando(false);
   }
 
   useEffect(() => {
     carregarPromocoes();
   }, []);
+
+  // =====================================================
+  // MENSAGENS
+  // =====================================================
+
+  function mostrarMensagem(texto: string, houveErro = false) {
+    setMensagem(texto);
+    setErro(houveErro);
+  }
 
   // =====================================================
   // LIMPAR FORMULÁRIO
@@ -86,6 +111,22 @@ export default function AdminPromocoes() {
   }
 
   // =====================================================
+  // VALIDAR IMAGEM
+  // =====================================================
+
+  function validarImagem(arquivo: File): string | null {
+    if (!TIPOS_PERMITIDOS.includes(arquivo.type)) {
+      return "Formato inválido. Use JPG, PNG ou WEBP.";
+    }
+
+    if (arquivo.size > LIMITE_IMAGEM) {
+      return "A imagem deve ter no máximo 5 MB.";
+    }
+
+    return null;
+  }
+
+  // =====================================================
   // UPLOAD DA IMAGEM
   // =====================================================
 
@@ -94,12 +135,24 @@ export default function AdminPromocoes() {
       return imagemAtual;
     }
 
-    const extensao = imagem.name.split(".").pop();
-    const nomeArquivo = `${Date.now()}.${extensao}`;
+    const validacao = validarImagem(imagem);
+
+    if (validacao) {
+      throw new Error(validacao);
+    }
+
+    const supabase = createClient();
+
+    const extensao = imagem.name.split(".").pop()?.toLowerCase() || "jpg";
+
+    const nomeArquivo = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 8)}.${extensao}`;
+
     const caminho = `promocoes/${nomeArquivo}`;
 
     const { error } = await supabase.storage
-      .from("posto-gasparin-media")
+      .from(BUCKET)
       .upload(caminho, imagem, {
         cacheControl: "3600",
         upsert: false,
@@ -107,43 +160,71 @@ export default function AdminPromocoes() {
 
     if (error) {
       console.error("Erro no upload:", error);
-      throw new Error("Erro ao enviar imagem.");
+      throw new Error("Não foi possível enviar a imagem.");
     }
 
     const { data } = supabase.storage
-      .from("posto-gasparin-media")
+      .from(BUCKET)
       .getPublicUrl(caminho);
 
     return data.publicUrl;
   }
 
   // =====================================================
+  // SELECIONAR IMAGEM
+  // =====================================================
+
+  function selecionarImagem(arquivo: File | null) {
+    if (!arquivo) {
+      setImagem(null);
+      return;
+    }
+
+    const validacao = validarImagem(arquivo);
+
+    if (validacao) {
+      mostrarMensagem(validacao, true);
+      setImagem(null);
+      return;
+    }
+
+    setImagem(arquivo);
+    mostrarMensagem("");
+  }
+
+  // =====================================================
   // CADASTRAR / EDITAR
   // =====================================================
 
-  async function salvarPromocao(event: FormEvent) {
+  async function salvarPromocao(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setMensagem("");
-    setErro(false);
+    if (salvando) return;
 
-    if (!titulo.trim() || !descricao.trim() || !inicio || !fim) {
-      setMensagem("Preencha todos os campos obrigatórios.");
-      setErro(true);
+    mostrarMensagem("");
+
+    if (
+      !titulo.trim() ||
+      !descricao.trim() ||
+      !inicio ||
+      !fim
+    ) {
+      mostrarMensagem("Preencha todos os campos obrigatórios.", true);
       return;
     }
 
     if (fim < inicio) {
-      setMensagem(
-        "A data de encerramento deve ser posterior à data de início."
+      mostrarMensagem(
+        "A data de encerramento deve ser igual ou posterior à data de início.",
+        true
       );
-      setErro(true);
       return;
     }
 
     setSalvando(true);
 
     try {
+      const supabase = createClient();
       const imagemUrl = await enviarImagem();
 
       const dados = {
@@ -165,37 +246,35 @@ export default function AdminPromocoes() {
           .eq("id", editandoId);
 
         if (error) {
-          console.error("Erro ao atualizar:", error);
-          throw new Error(error.message);
+          console.error("Erro ao atualizar promoção:", error);
+          throw new Error("Não foi possível atualizar a promoção.");
         }
 
-        setMensagem("Promoção atualizada com sucesso!");
+        mostrarMensagem("Promoção atualizada com sucesso!");
       } else {
         const { error } = await supabase
           .from("promotions")
-          .insert([dados]);
+          .insert(dados);
 
         if (error) {
-          console.error("Erro ao cadastrar:", error);
-          throw new Error(error.message);
+          console.error("Erro ao cadastrar promoção:", error);
+          throw new Error("Não foi possível cadastrar a promoção.");
         }
 
-        setMensagem("Promoção cadastrada com sucesso!");
+        mostrarMensagem("Promoção cadastrada com sucesso!");
       }
 
-      setErro(false);
       limparFormulario();
       await carregarPromocoes();
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao salvar promoção:", error);
 
-      setMensagem(
+      mostrarMensagem(
         error instanceof Error
           ? error.message
-          : "Ocorreu um erro ao salvar a promoção."
+          : "Ocorreu um erro inesperado ao salvar.",
+        true
       );
-
-      setErro(true);
     } finally {
       setSalvando(false);
     }
@@ -218,6 +297,8 @@ export default function AdminPromocoes() {
     setImagemAtual(promocao.imagem_url);
     setEditandoId(promocao.id);
 
+    mostrarMensagem("");
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -235,22 +316,31 @@ export default function AdminPromocoes() {
 
     if (!confirmar) return;
 
-    const { error } = await supabase
-      .from("promotions")
-      .delete()
-      .eq("id", id);
+    const supabase = createClient();
 
-    if (error) {
-      console.error("Erro ao excluir:", error);
-      setMensagem(error.message);
-      setErro(true);
-      return;
+    try {
+      const { error } = await supabase
+        .from("promotions")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Erro ao excluir promoção:", error);
+        mostrarMensagem("Não foi possível excluir a promoção.", true);
+        return;
+      }
+
+      mostrarMensagem("Promoção excluída com sucesso!");
+
+      if (editandoId === id) {
+        limparFormulario();
+      }
+
+      await carregarPromocoes();
+    } catch (error) {
+      console.error(error);
+      mostrarMensagem("Ocorreu um erro ao excluir a promoção.", true);
     }
-
-    setMensagem("Promoção excluída com sucesso!");
-    setErro(false);
-
-    await carregarPromocoes();
   }
 
   // =====================================================
@@ -259,28 +349,64 @@ export default function AdminPromocoes() {
 
   async function alternarStatus(promocao: Promocao) {
     const novoStatus = !promocao.ativo;
+    const supabase = createClient();
 
-    const { error } = await supabase
-      .from("promotions")
-      .update({ ativo: novoStatus })
-      .eq("id", promocao.id);
+    try {
+      const { error } = await supabase
+        .from("promotions")
+        .update({ ativo: novoStatus })
+        .eq("id", promocao.id);
 
-    if (error) {
-      console.error("Erro ao alterar status:", error);
-      setMensagem(error.message);
-      setErro(true);
-      return;
+      if (error) {
+        console.error("Erro ao alterar status:", error);
+        mostrarMensagem("Não foi possível alterar o status.", true);
+        return;
+      }
+
+      mostrarMensagem(
+        novoStatus
+          ? "Promoção ativada com sucesso!"
+          : "Promoção desativada com sucesso!"
+      );
+
+      await carregarPromocoes();
+    } catch (error) {
+      console.error(error);
+      mostrarMensagem("Ocorreu um erro ao alterar o status.", true);
     }
+  }
 
-    setMensagem(
-      novoStatus
-        ? "Promoção ativada com sucesso!"
-        : "Promoção desativada com sucesso!"
-    );
+  // =====================================================
+  // DESTAQUE
+  // =====================================================
 
-    setErro(false);
+  async function alternarDestaque(promocao: Promocao) {
+    const novoDestaque = !promocao.destaque;
+    const supabase = createClient();
 
-    await carregarPromocoes();
+    try {
+      const { error } = await supabase
+        .from("promotions")
+        .update({ destaque: novoDestaque })
+        .eq("id", promocao.id);
+
+      if (error) {
+        console.error("Erro ao alterar destaque:", error);
+        mostrarMensagem("Não foi possível alterar o destaque.", true);
+        return;
+      }
+
+      mostrarMensagem(
+        novoDestaque
+          ? "Promoção marcada como destaque!"
+          : "Destaque removido!"
+      );
+
+      await carregarPromocoes();
+    } catch (error) {
+      console.error(error);
+      mostrarMensagem("Ocorreu um erro ao alterar o destaque.", true);
+    }
   }
 
   // =====================================================
@@ -296,11 +422,25 @@ export default function AdminPromocoes() {
   }
 
   // =====================================================
-  // SITUAÇÃO DA PROMOÇÃO
+  // DATA DE HOJE
+  // =====================================================
+
+  function dataHoje() {
+    const hoje = new Date();
+
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  // =====================================================
+  // SITUAÇÃO
   // =====================================================
 
   function situacaoPromocao(promocao: Promocao) {
-    const hoje = new Date().toLocaleDateString("en-CA");
+    const hoje = dataHoje();
 
     if (!promocao.ativo) {
       return "Inativa";
@@ -318,11 +458,31 @@ export default function AdminPromocoes() {
   }
 
   // =====================================================
-  // NOME DO TIPO
+  // TIPO
   // =====================================================
 
-  function nomeTipo(tipo: "promocao" | "sorteio") {
+  function nomeTipo(tipo: Promocao["tipo"]) {
     return tipo === "sorteio" ? "Sorteio" : "Promoção";
+  }
+
+  // =====================================================
+  // COR DO STATUS
+  // =====================================================
+
+  function corStatus(status: string) {
+    switch (status) {
+      case "Em andamento":
+        return "bg-green-100 text-green-800";
+
+      case "Agendada":
+        return "bg-blue-100 text-blue-800";
+
+      case "Encerrada":
+        return "bg-gray-100 text-gray-700";
+
+      default:
+        return "bg-red-100 text-red-800";
+    }
   }
 
   // =====================================================
@@ -331,18 +491,22 @@ export default function AdminPromocoes() {
 
   return (
     <main className="min-h-screen bg-gray-100">
+
       {/* HEADER */}
       <header className="bg-[#173690] text-white shadow-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+
           <div>
-            <h1 className="text-2xl font-bold">Posto Gasparin</h1>
+            <h1 className="text-2xl font-bold">
+              Posto Gasparin
+            </h1>
 
             <p className="text-sm text-white/80">
               Painel Administrativo
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link
               href="/admin/dashboard"
               className="rounded-lg border border-[#36b970] px-4 py-2 text-sm font-semibold transition hover:bg-[#36b970]"
@@ -352,7 +516,7 @@ export default function AdminPromocoes() {
 
             <Link
               href="/"
-              className="hidden rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#2fa864] sm:block"
+              className="rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#2fa864]"
             >
               Ver site
             </Link>
@@ -360,7 +524,9 @@ export default function AdminPromocoes() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-6xl px-6 py-10">
+      {/* CONTEÚDO */}
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+
         {/* TÍTULO */}
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#36b970]">
@@ -372,14 +538,14 @@ export default function AdminPromocoes() {
           </h2>
 
           <p className="mt-2 text-gray-600">
-            Cadastre e gerencie as promoções e sorteios que serão
-            divulgados no site.
+            Cadastre e gerencie as promoções e sorteios que serão divulgados no site.
           </p>
         </div>
 
         {/* MENSAGEM */}
         {mensagem && (
           <div
+            role="alert"
             className={`mb-6 rounded-xl border p-4 ${
               erro
                 ? "border-red-200 bg-red-50 text-red-700"
@@ -397,7 +563,8 @@ export default function AdminPromocoes() {
         )}
 
         {/* FORMULÁRIO */}
-        <section className="mb-10 rounded-2xl bg-white p-6 shadow-sm">
+        <section className="mb-10 rounded-2xl bg-white p-5 shadow-sm sm:p-6">
+
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h3 className="text-xl font-bold text-[#173690]">
@@ -415,42 +582,56 @@ export default function AdminPromocoes() {
               <button
                 type="button"
                 onClick={limparFormulario}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
               >
                 Cancelar edição
               </button>
             )}
           </div>
 
-          <form onSubmit={salvarPromocao} className="mt-6 space-y-5">
+          <form
+            onSubmit={salvarPromocao}
+            className="mt-6 space-y-5"
+          >
+
             {/* TÍTULO */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
+              <label
+                htmlFor="titulo"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 Título *
               </label>
 
               <input
+                id="titulo"
                 type="text"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ex.: Promoção especial"
                 required
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                disabled={salvando}
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
               />
             </div>
 
             {/* TIPO */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
+              <label
+                htmlFor="tipo"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 Tipo *
               </label>
 
               <select
+                id="tipo"
                 value={tipo}
                 onChange={(e) =>
                   setTipo(e.target.value as "promocao" | "sorteio")
                 }
-                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                disabled={salvando}
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
               >
                 <option value="promocao">Promoção</option>
                 <option value="sorteio">Sorteio</option>
@@ -459,95 +640,109 @@ export default function AdminPromocoes() {
 
             {/* DESCRIÇÃO */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
+              <label
+                htmlFor="descricao"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 Descrição *
               </label>
 
               <textarea
+                id="descricao"
                 value={descricao}
                 onChange={(e) => setDescricao(e.target.value)}
                 placeholder="Descreva a promoção ou sorteio..."
                 rows={5}
                 required
-                className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                disabled={salvando}
+                className="w-full resize-y rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
               />
             </div>
 
             {/* DATAS */}
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                <label
+                  htmlFor="inicio"
+                  className="mb-2 block text-sm font-semibold text-gray-700"
+                >
                   Data de início *
                 </label>
 
                 <input
+                  id="inicio"
                   type="date"
                   value={inicio}
                   onChange={(e) => setInicio(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                  disabled={salvando}
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                <label
+                  htmlFor="fim"
+                  className="mb-2 block text-sm font-semibold text-gray-700"
+                >
                   Data de encerramento *
                 </label>
 
                 <input
+                  id="fim"
                   type="date"
                   value={fim}
                   onChange={(e) => setFim(e.target.value)}
-                  required
                   min={inicio || undefined}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                  required
+                  disabled={salvando}
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
                 />
               </div>
             </div>
 
             {/* REGULAMENTO */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
+              <label
+                htmlFor="regulamento"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 Regulamento / Informações adicionais
               </label>
 
               <textarea
+                id="regulamento"
                 value={regulamento}
                 onChange={(e) => setRegulamento(e.target.value)}
                 placeholder="Informe regras, condições, detalhes do sorteio..."
                 rows={4}
-                className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                disabled={salvando}
+                className="w-full resize-y rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20 disabled:bg-gray-100"
               />
             </div>
 
             {/* IMAGEM */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
+              <label
+                htmlFor="imagem"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
                 Imagem da promoção
               </label>
 
               <input
+                id="imagem"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={salvando}
                 onChange={(e) => {
-                  const arquivo = e.target.files?.[0] || null;
-
-                  if (arquivo && arquivo.size > 5 * 1024 * 1024) {
-                    setMensagem("A imagem deve ter no máximo 5 MB.");
-                    setErro(true);
-                    e.target.value = "";
-                    return;
-                  }
-
-                  setImagem(arquivo);
-                  setMensagem("");
-                  setErro(false);
+                  selecionarImagem(e.target.files?.[0] || null);
                 }}
-                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3"
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 disabled:bg-gray-100"
               />
 
               <p className="mt-2 text-xs text-gray-500">
-                Formatos de imagem aceitos. Tamanho máximo: 5 MB.
+                JPG, PNG ou WEBP. Tamanho máximo: 5 MB.
               </p>
 
               {imagem && (
@@ -565,20 +760,36 @@ export default function AdminPromocoes() {
                   <img
                     src={imagemAtual}
                     alt="Imagem atual da promoção"
-                    className="h-48 rounded-xl border object-contain"
+                    className="max-h-64 max-w-full rounded-xl border border-gray-200 object-contain"
+                  />
+                </div>
+              )}
+
+              {imagem && (
+                <div className="mt-4">
+                  <p className="mb-2 text-sm font-semibold text-gray-700">
+                    Pré-visualização:
+                  </p>
+
+                  <img
+                    src={URL.createObjectURL(imagem)}
+                    alt="Pré-visualização da nova imagem"
+                    className="max-h-64 max-w-full rounded-xl border border-gray-200 object-contain"
                   />
                 </div>
               )}
             </div>
 
             {/* OPÇÕES */}
-            <div className="space-y-3 rounded-xl bg-gray-50 p-4">
-              <label className="flex cursor-pointer items-center gap-3">
+            <div className="space-y-4 rounded-xl bg-gray-50 p-4">
+
+              <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
                   checked={ativa}
                   onChange={(e) => setAtiva(e.target.checked)}
-                  className="h-5 w-5 accent-[#36b970]"
+                  disabled={salvando}
+                  className="mt-1 h-5 w-5 accent-[#36b970]"
                 />
 
                 <div>
@@ -592,12 +803,13 @@ export default function AdminPromocoes() {
                 </div>
               </label>
 
-              <label className="flex cursor-pointer items-center gap-3">
+              <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
                   checked={destaque}
                   onChange={(e) => setDestaque(e.target.checked)}
-                  className="h-5 w-5 accent-[#36b970]"
+                  disabled={salvando}
+                  className="mt-1 h-5 w-5 accent-[#36b970]"
                 />
 
                 <div>
@@ -606,191 +818,196 @@ export default function AdminPromocoes() {
                   </p>
 
                   <p className="text-sm text-gray-500">
-                    Marque para dar maior destaque no site.
+                    Marque para dar prioridade de exibição no site.
                   </p>
                 </div>
               </label>
             </div>
 
-            {/* BOTÃO */}
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={salvando}
-                className="w-full rounded-xl bg-[#173690] px-7 py-3 font-bold text-white transition hover:bg-[#36b970] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              >
-                {salvando
-                  ? "Salvando..."
-                  : editandoId !== null
+            {/* BOTÃO SALVAR */}
+            <button
+              type="submit"
+              disabled={salvando}
+              className="w-full rounded-xl bg-[#173690] px-6 py-3.5 font-bold text-white transition hover:bg-[#36b970] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {salvando
+                ? "Salvando..."
+                : editandoId !== null
                   ? "💾 Salvar alterações"
                   : "➕ Cadastrar promoção"}
-              </button>
-            </div>
+            </button>
           </form>
         </section>
 
-        {/* LISTA DE PROMOÇÕES */}
-        <section>
-          <div className="mb-5">
-            <h3 className="text-xl font-bold text-[#173690]">
-              Promoções cadastradas
-            </h3>
+        {/* LISTAGEM */}
+        <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
 
-            <p className="mt-1 text-sm text-gray-500">
-              {promocoes.length}{" "}
-              {promocoes.length === 1
-                ? "item cadastrado"
-                : "itens cadastrados"}
-            </p>
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-[#173690]">
+                Promoções cadastradas
+              </h3>
+
+              <p className="mt-1 text-sm text-gray-500">
+                {promocoes.length} registro(s)
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={carregarPromocoes}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+            >
+              ↻ Atualizar lista
+            </button>
           </div>
 
           {/* CARREGANDO */}
           {carregando ? (
-            <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-              <p className="text-gray-600">
+            <div className="py-12 text-center">
+              <div className="mx-auto mb-4 h-9 w-9 animate-spin rounded-full border-4 border-gray-300 border-t-[#173690]" />
+
+              <p className="text-gray-500">
                 Carregando promoções...
               </p>
             </div>
           ) : promocoes.length === 0 ? (
-            <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-              <div className="text-5xl">🎁</div>
-
-              <h3 className="mt-4 text-lg font-bold text-[#173690]">
+            /* VAZIO */
+            <div className="rounded-xl border border-dashed border-gray-300 py-12 text-center">
+              <p className="text-lg font-semibold text-gray-700">
                 Nenhuma promoção cadastrada
-              </h3>
+              </p>
 
               <p className="mt-2 text-sm text-gray-500">
-                Cadastre uma promoção ou sorteio utilizando o formulário acima.
+                Utilize o formulário acima para cadastrar a primeira.
               </p>
             </div>
           ) : (
-            <div className="grid gap-5 lg:grid-cols-2">
-              {promocoes.map((promocao) => (
-                <article
-                  key={promocao.id}
-                  className="overflow-hidden rounded-2xl bg-white shadow-sm"
-                >
-                  {/* IMAGEM */}
-                  {promocao.imagem_url && (
-                    <img
-                      src={promocao.imagem_url}
-                      alt={promocao.titulo}
-                      className="h-56 w-full object-cover"
-                    />
-                  )}
+            /* LISTA */
+            <div className="grid gap-5 md:grid-cols-2">
 
-                  <div className="p-6">
-                    {/* CABEÇALHO */}
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#36b970]/10 text-2xl">
-                        {promocao.tipo === "sorteio" ? "🎟️" : "🎁"}
+              {promocoes.map((promocao) => {
+                const status = situacaoPromocao(promocao);
+
+                return (
+                  <article
+                    key={promocao.id}
+                    className="overflow-hidden rounded-2xl border border-gray-200 bg-white"
+                  >
+
+                    {/* IMAGEM */}
+                    {promocao.imagem_url && (
+                      <img
+                        src={promocao.imagem_url}
+                        alt={promocao.titulo}
+                        className="h-52 w-full object-cover"
+                      />
+                    )}
+
+                    {/* CONTEÚDO */}
+                    <div className="p-5">
+
+                      <div className="mb-3 flex flex-wrap gap-2">
+                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-800">
+                          {nomeTipo(promocao.tipo)}
+                        </span>
+
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-bold ${corStatus(status)}`}
+                        >
+                          {status}
+                        </span>
+
+                        {promocao.destaque && (
+                          <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-bold text-yellow-800">
+                            ⭐ Destaque
+                          </span>
+                        )}
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className="rounded-full bg-[#36b970]/10 px-3 py-1 text-xs font-bold text-[#173690]">
-                            {nomeTipo(promocao.tipo)}
-                          </span>
+                      <h4 className="text-lg font-bold text-[#173690]">
+                        {promocao.titulo}
+                      </h4>
 
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-bold ${
-                              promocao.ativo
-                                ? "bg-[#36b970]/10 text-[#173690]"
-                                : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {promocao.ativo ? "Ativa" : "Inativa"}
-                          </span>
+                      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">
+                        {promocao.descricao}
+                      </p>
 
-                          {promocao.destaque && (
-                            <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-bold text-yellow-800">
-                              ⭐ Destaque
-                            </span>
-                          )}
-                        </div>
-
-                        <h4 className="text-lg font-bold text-[#173690]">
-                          {promocao.titulo}
-                        </h4>
-
-                        <p className="mt-1 text-xs font-semibold text-gray-500">
-                          {situacaoPromocao(promocao)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* DESCRIÇÃO */}
-                    <p className="mt-5 whitespace-pre-line text-sm leading-6 text-gray-600">
-                      {promocao.descricao}
-                    </p>
-
-                    {/* DATAS */}
-                    <div className="mt-5 grid gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-2">
-                      <div>
-                        <p className="text-xs font-semibold uppercase text-gray-500">
-                          Início
-                        </p>
-
-                        <p className="mt-1 font-semibold text-gray-800">
+                      <div className="mt-4 rounded-xl bg-gray-50 p-3 text-sm">
+                        <p>
+                          <strong>Início:</strong>{" "}
                           {formatarData(promocao.data_inicio)}
                         </p>
-                      </div>
 
-                      <div>
-                        <p className="text-xs font-semibold uppercase text-gray-500">
-                          Encerramento
-                        </p>
-
-                        <p className="mt-1 font-semibold text-gray-800">
+                        <p className="mt-1">
+                          <strong>Encerramento:</strong>{" "}
                           {formatarData(promocao.data_fim)}
                         </p>
                       </div>
-                    </div>
 
-                    {/* REGULAMENTO */}
-                    {promocao.regulamento && (
-                      <div className="mt-4 rounded-xl border border-gray-100 p-4">
-                        <p className="text-xs font-semibold uppercase text-gray-500">
-                          Regulamento
-                        </p>
+                      {promocao.regulamento && (
+                        <details className="mt-4">
+                          <summary className="cursor-pointer text-sm font-semibold text-[#173690]">
+                            Ver regulamento
+                          </summary>
 
-                        <p className="mt-2 whitespace-pre-line text-sm text-gray-600">
-                          {promocao.regulamento}
-                        </p>
+                          <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">
+                            {promocao.regulamento}
+                          </p>
+                        </details>
+                      )}
+
+                      {/* AÇÕES */}
+                      <div className="mt-5 flex flex-wrap gap-2">
+
+                        <button
+                          type="button"
+                          onClick={() => editarPromocao(promocao)}
+                          className="rounded-lg bg-[#173690] px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
+                        >
+                          ✏️ Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => alternarStatus(promocao)}
+                          className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                            promocao.ativo
+                              ? "bg-orange-100 text-orange-800 hover:bg-orange-200"
+                              : "bg-green-100 text-green-800 hover:bg-green-200"
+                          }`}
+                        >
+                          {promocao.ativo
+                            ? "Desativar"
+                            : "Ativar"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => alternarDestaque(promocao)}
+                          className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                            promocao.destaque
+                              ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          {promocao.destaque
+                            ? "★ Remover destaque"
+                            : "☆ Destacar"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => excluirPromocao(promocao.id)}
+                          className="rounded-lg bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-200"
+                        >
+                          🗑️ Excluir
+                        </button>
                       </div>
-                    )}
-
-                    {/* BOTÕES */}
-                    <div className="mt-6 grid gap-3 border-t border-gray-100 pt-5 sm:grid-cols-3">
-                      <button
-                        type="button"
-                        onClick={() => editarPromocao(promocao)}
-                        className="rounded-lg border border-[#36b970] px-4 py-2 text-sm font-bold text-[#173690] transition hover:bg-[#36b970]/10"
-                      >
-                        ✏️ Editar
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => alternarStatus(promocao)}
-                        className="rounded-lg border border-[#36b970] px-4 py-2 text-sm font-bold text-[#173690] transition hover:bg-[#36b970]/10"
-                      >
-                        {promocao.ativo
-                          ? "⏸️ Desativar"
-                          : "▶️ Ativar"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => excluirPromocao(promocao.id)}
-                        className="rounded-lg border border-red-300 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50"
-                      >
-                        🗑️ Excluir
-                      </button>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>

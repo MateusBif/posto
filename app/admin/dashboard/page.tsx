@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -8,23 +9,28 @@ export default function AdminDashboard() {
   const [menuAberto, setMenuAberto] = useState(false);
   const [saindo, setSaindo] = useState(false);
 
-  // Logout real do Supabase
   async function sair() {
     if (saindo) return;
 
     setSaindo(true);
 
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
 
-    const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      window.location.href = "/admin/login";
+    } catch (error) {
+      console.error("Erro ao sair:", error);
+
       alert("Não foi possível sair. Tente novamente.");
-      setSaindo(false);
-      return;
-    }
 
-    window.location.href = "/admin/login";
+      setSaindo(false);
+    }
   }
 
   const modulos = [
@@ -79,7 +85,7 @@ export default function AdminDashboard() {
           <nav className="hidden items-center gap-6 md:flex">
             <Link
               href="/"
-              className="text-sm font-medium hover:text-[#36b970]"
+              className="text-sm font-medium transition hover:text-[#36b970]"
             >
               Ver site
             </Link>
@@ -93,23 +99,24 @@ export default function AdminDashboard() {
             </button>
           </nav>
 
-          {/* MENU MOBILE */}
+          {/* BOTÃO MOBILE */}
           <button
             onClick={() => setMenuAberto(!menuAberto)}
             className="text-2xl md:hidden"
             aria-label="Abrir menu"
+            aria-expanded={menuAberto}
           >
             ☰
           </button>
         </div>
 
-        {/* MENU MOBILE ABERTO */}
+        {/* MENU MOBILE */}
         {menuAberto && (
           <div className="border-t border-white/20 px-6 py-4 md:hidden">
             <div className="flex flex-col gap-4">
               <Link
                 href="/"
-                className="text-sm font-medium hover:text-[#36b970]"
+                className="text-sm font-medium transition hover:text-[#36b970]"
                 onClick={() => setMenuAberto(false)}
               >
                 Ver site
@@ -140,8 +147,8 @@ export default function AdminDashboard() {
           </h2>
 
           <p className="mt-2 max-w-2xl text-gray-600">
-            Gerencie as informações que serão exibidas no site público
-            do Posto Gasparin.
+            Gerencie as informações que serão exibidas no site
+            público do Posto Gasparin.
           </p>
         </div>
 
@@ -177,7 +184,7 @@ export default function AdminDashboard() {
                 {modulo.icone}
               </div>
 
-              <h3 className="text-xl font-bold text-[#173690] group-hover:text-[#36b970]">
+              <h3 className="text-xl font-bold text-[#173690] transition group-hover:text-[#36b970]">
                 {modulo.titulo}
               </h3>
 

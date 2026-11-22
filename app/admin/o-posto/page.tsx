@@ -1,6 +1,7 @@
+
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -19,6 +20,24 @@ type Formulario = {
   estrutura4: string;
 };
 
+const BUCKET = "posto-gasparin-media";
+const LIMITE_ARQUIVO = 5 * 1024 * 1024;
+
+const formularioInicial: Formulario = {
+  nome: "",
+  titulo: "",
+  descricao: "",
+  historia: "",
+  diferencial1: "",
+  diferencial2: "",
+  diferencial3: "",
+  diferencial4: "",
+  estrutura1: "",
+  estrutura2: "",
+  estrutura3: "",
+  estrutura4: "",
+};
+
 export default function AdminOPosto() {
   const supabase = createClient();
 
@@ -33,64 +52,60 @@ export default function AdminOPosto() {
   const [logoAtual, setLogoAtual] = useState("");
   const [faviconAtual, setFaviconAtual] = useState("");
 
-  const [formulario, setFormulario] = useState<Formulario>({
-    nome: "",
-    titulo: "",
-    descricao: "",
-    historia: "",
-    diferencial1: "",
-    diferencial2: "",
-    diferencial3: "",
-    diferencial4: "",
-    estrutura1: "",
-    estrutura2: "",
-    estrutura3: "",
-    estrutura4: "",
-  });
+  const [formulario, setFormulario] =
+    useState<Formulario>(formularioInicial);
 
-  // CARREGAR INFORMAÇÕES DO SUPABASE
+  // CARREGAR DADOS
   useEffect(() => {
     async function carregarDados() {
-      const { data, error } = await supabase
-        .from("site_config")
-        .select("*")
-        .eq("id", 1)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("site_config")
+          .select("*")
+          .eq("id", 1)
+          .maybeSingle();
 
-      if (error) {
-        setErro("Não foi possível carregar as informações do posto.");
+        if (error) {
+          console.error("Erro ao carregar site_config:", error);
+          setErro("Não foi possível carregar as informações do posto.");
+          return;
+        }
+
+        if (data) {
+          setFormulario({
+            nome: data.nome_posto || "",
+            titulo: data.titulo_apresentacao || "",
+            descricao: data.descricao || "",
+            historia: data.historia || "",
+            diferencial1: data.diferencial1 || "",
+            diferencial2: data.diferencial2 || "",
+            diferencial3: data.diferencial3 || "",
+            diferencial4: data.diferencial4 || "",
+            estrutura1: data.estrutura1 || "",
+            estrutura2: data.estrutura2 || "",
+            estrutura3: data.estrutura3 || "",
+            estrutura4: data.estrutura4 || "",
+          });
+
+          setLogoAtual(data.logo_url || "");
+          setFaviconAtual(data.favicon_url || "");
+        }
+      } catch (error) {
+        console.error("Erro inesperado:", error);
+        setErro("Ocorreu um erro ao carregar os dados.");
+      } finally {
         setCarregando(false);
-        return;
       }
-
-      if (data) {
-        setFormulario({
-          nome: data.nome_posto || "",
-          titulo: data.titulo_apresentacao || "",
-          descricao: data.descricao || "",
-          historia: data.historia || "",
-          diferencial1: data.diferencial1 || "",
-          diferencial2: data.diferencial2 || "",
-          diferencial3: data.diferencial3 || "",
-          diferencial4: data.diferencial4 || "",
-          estrutura1: data.estrutura1 || "",
-          estrutura2: data.estrutura2 || "",
-          estrutura3: data.estrutura3 || "",
-          estrutura4: data.estrutura4 || "",
-        });
-
-        setLogoAtual(data.logo_url || "");
-        setFaviconAtual(data.favicon_url || "");
-      }
-
-      setCarregando(false);
     }
 
     carregarDados();
   }, []);
 
   // ALTERAR CAMPO
-  function alterarCampo(campo: keyof Formulario, valor: string) {
+  function alterarCampo(
+    campo: keyof Formulario,
+    valor: string
+  ) {
     setFormulario((anterior) => ({
       ...anterior,
       [campo]: valor,
@@ -100,19 +115,48 @@ export default function AdminOPosto() {
     setErro("");
   }
 
-  // FAZER UPLOAD DE IMAGEM
+  // VALIDAR ARQUIVO
+  function validarImagem(arquivo: File): string | null {
+    const tiposPermitidos = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/svg+xml",
+      "image/x-icon",
+      "image/vnd.microsoft.icon",
+    ];
+
+    if (!tiposPermitidos.includes(arquivo.type)) {
+      return "Formato inválido. Use JPG, PNG, WEBP, SVG ou ICO.";
+    }
+
+    if (arquivo.size > LIMITE_ARQUIVO) {
+      return "O arquivo deve possuir no máximo 5 MB.";
+    }
+
+    return null;
+  }
+
+  // UPLOAD
   async function enviarImagem(
     arquivo: File,
     pasta: string
   ): Promise<string | null> {
-    const extensao = arquivo.name.split(".").pop();
+    const validacao = validarImagem(arquivo);
+
+    if (validacao) {
+      setErro(validacao);
+      return null;
+    }
+
+    const extensao = arquivo.name.split(".").pop()?.toLowerCase() || "jpg";
 
     const nomeArquivo = `${pasta}-${Date.now()}.${extensao}`;
 
     const caminho = `${pasta}/${nomeArquivo}`;
 
     const { error } = await supabase.storage
-      .from("posto-gasparin-media")
+      .from(BUCKET)
       .upload(caminho, arquivo, {
         cacheControl: "3600",
         upsert: false,
@@ -120,106 +164,156 @@ export default function AdminOPosto() {
 
     if (error) {
       console.error("Erro no upload:", error);
+      setErro(`Não foi possível enviar o arquivo ${arquivo.name}.`);
       return null;
     }
 
     const { data } = supabase.storage
-      .from("posto-gasparin-media")
+      .from(BUCKET)
       .getPublicUrl(caminho);
 
     return data.publicUrl;
   }
 
-  // SALVAR ALTERAÇÕES
-  async function salvarAlteracoes(event: FormEvent<HTMLFormElement>) {
+  // SELECIONAR LOGO
+  function selecionarLogo(arquivo: File | null) {
+    if (!arquivo) {
+      setLogo(null);
+      return;
+    }
+
+    const validacao = validarImagem(arquivo);
+
+    if (validacao) {
+      setErro(validacao);
+      setLogo(null);
+      return;
+    }
+
+    setLogo(arquivo);
+    setErro("");
+    setSalvo(false);
+  }
+
+  // SELECIONAR FAVICON
+  function selecionarFavicon(arquivo: File | null) {
+    if (!arquivo) {
+      setFavicon(null);
+      return;
+    }
+
+    const validacao = validarImagem(arquivo);
+
+    if (validacao) {
+      setErro(validacao);
+      setFavicon(null);
+      return;
+    }
+
+    setFavicon(arquivo);
+    setErro("");
+    setSalvo(false);
+  }
+
+  // SALVAR
+  async function salvarAlteracoes(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
+
+    if (salvando) return;
 
     setSalvando(true);
     setSalvo(false);
     setErro("");
 
-    let novaLogo = logoAtual;
-    let novoFavicon = faviconAtual;
+    try {
+      let novaLogo = logoAtual;
+      let novoFavicon = faviconAtual;
 
-    // UPLOAD DA LOGO
-    if (logo) {
-      const url = await enviarImagem(logo, "logo");
+      // UPLOAD DA LOGO
+      if (logo) {
+        const url = await enviarImagem(logo, "logo");
 
-      if (!url) {
-        setErro("Erro ao enviar a logo. Verifique o arquivo e tente novamente.");
-        setSalvando(false);
+        if (!url) return;
+
+        novaLogo = url;
+      }
+
+      // UPLOAD DO FAVICON
+      if (favicon) {
+        const url = await enviarImagem(favicon, "favicon");
+
+        if (!url) return;
+
+        novoFavicon = url;
+      }
+
+      // SALVAR NO BANCO
+      const { error } = await supabase
+        .from("site_config")
+        .upsert(
+          {
+            id: 1,
+
+            nome_posto: formulario.nome,
+            slogan: formulario.titulo,
+            titulo_apresentacao: formulario.titulo,
+            descricao: formulario.descricao,
+            historia: formulario.historia,
+
+            diferencial1: formulario.diferencial1,
+            diferencial2: formulario.diferencial2,
+            diferencial3: formulario.diferencial3,
+            diferencial4: formulario.diferencial4,
+
+            estrutura1: formulario.estrutura1,
+            estrutura2: formulario.estrutura2,
+            estrutura3: formulario.estrutura3,
+            estrutura4: formulario.estrutura4,
+
+            logo_url: novaLogo,
+            favicon_url: novoFavicon,
+          },
+          {
+            onConflict: "id",
+          }
+        );
+
+      if (error) {
+        console.error("Erro ao salvar:", error);
+        setErro(
+          "Não foi possível salvar as alterações no banco de dados."
+        );
         return;
       }
 
-      novaLogo = url;
-    }
+      setLogoAtual(novaLogo);
+      setFaviconAtual(novoFavicon);
 
-    // UPLOAD DO FAVICON
-    if (favicon) {
-      const url = await enviarImagem(favicon, "favicon");
+      setLogo(null);
+      setFavicon(null);
 
-      if (!url) {
-        setErro("Erro ao enviar o favicon. Verifique o arquivo e tente novamente.");
-        setSalvando(false);
-        return;
-      }
+      setSalvo(true);
 
-      novoFavicon = url;
-    }
-
-    // SALVAR NO BANCO
-    const { error } = await supabase
-      .from("site_config")
-      .update({
-        nome_posto: formulario.nome,
-        slogan: formulario.titulo,
-        titulo_apresentacao: formulario.titulo,
-        descricao: formulario.descricao,
-        historia: formulario.historia,
-
-        diferencial1: formulario.diferencial1,
-        diferencial2: formulario.diferencial2,
-        diferencial3: formulario.diferencial3,
-        diferencial4: formulario.diferencial4,
-
-        estrutura1: formulario.estrutura1,
-        estrutura2: formulario.estrutura2,
-        estrutura3: formulario.estrutura3,
-        estrutura4: formulario.estrutura4,
-
-        logo_url: novaLogo,
-        favicon_url: novoFavicon,
-      })
-      .eq("id", 1);
-
-    if (error) {
-      console.error(error);
-
-      setErro("Não foi possível salvar as alterações no banco de dados.");
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    } catch (error) {
+      console.error("Erro inesperado ao salvar:", error);
+      setErro("Ocorreu um erro inesperado ao salvar.");
+    } finally {
       setSalvando(false);
-      return;
     }
-
-    setLogoAtual(novaLogo);
-    setFaviconAtual(novoFavicon);
-
-    setLogo(null);
-    setFavicon(null);
-
-    setSalvo(true);
-    setSalvando(false);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   }
 
+  // LOADING
   if (carregando) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gray-100">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-[#173690]"></div>
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-[#173690]" />
 
           <p className="font-semibold text-[#173690]">
             Carregando informações...
@@ -231,18 +325,22 @@ export default function AdminOPosto() {
 
   return (
     <main className="min-h-screen bg-gray-100">
+
       {/* HEADER */}
       <header className="bg-[#173690] text-white shadow-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+
           <div>
-            <p className="text-2xl font-bold">Posto Gasparin</p>
+            <p className="text-2xl font-bold">
+              Posto Gasparin
+            </p>
 
             <p className="text-sm text-white/80">
               Painel Administrativo
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/admin/dashboard"
               className="rounded-lg border border-[#36b970] px-4 py-2 text-sm font-semibold transition hover:bg-[#36b970]"
@@ -252,7 +350,7 @@ export default function AdminOPosto() {
 
             <Link
               href="/"
-              className="hidden rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#2fa864] sm:block"
+              className="rounded-lg bg-[#36b970] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#2fa864]"
             >
               Ver site
             </Link>
@@ -261,7 +359,8 @@ export default function AdminOPosto() {
       </header>
 
       {/* CONTEÚDO */}
-      <section className="mx-auto max-w-5xl px-6 py-10">
+      <section className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+
         {/* TÍTULO */}
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#36b970]">
@@ -273,12 +372,12 @@ export default function AdminOPosto() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Edite as informações que serão apresentadas na página
-            "O Posto" do site.
+            Edite as informações que serão apresentadas
+            na página "O Posto" do site.
           </p>
         </div>
 
-        {/* MENSAGEM DE SUCESSO */}
+        {/* SUCESSO */}
         {salvo && (
           <div className="mb-6 rounded-xl border border-[#36b970]/30 bg-[#36b970]/10 p-4 text-[#173690]">
             <div className="flex items-center gap-3">
@@ -290,16 +389,19 @@ export default function AdminOPosto() {
                 </p>
 
                 <p className="text-sm">
-                  As informações foram atualizadas com sucesso no banco de dados.
+                  As informações foram atualizadas com sucesso.
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* MENSAGEM DE ERRO */}
+        {/* ERRO */}
         {erro && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+          <div
+            role="alert"
+            className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
+          >
             <p className="font-bold">Atenção</p>
             <p className="text-sm">{erro}</p>
           </div>
@@ -310,8 +412,9 @@ export default function AdminOPosto() {
           onSubmit={salvarAlteracoes}
           className="space-y-8"
         >
+
           {/* INFORMAÇÕES PRINCIPAIS */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-bold text-[#173690]">
               Informações principais
             </h2>
@@ -321,6 +424,7 @@ export default function AdminOPosto() {
             </p>
 
             <div className="mt-6 space-y-5">
+
               <Campo
                 label="Nome do posto"
                 value={formulario.nome}
@@ -344,7 +448,7 @@ export default function AdminOPosto() {
                     alterarCampo("descricao", e.target.value)
                   }
                   rows={5}
-                  className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                  className="w-full resize-y rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
                 />
               </div>
 
@@ -359,14 +463,14 @@ export default function AdminOPosto() {
                     alterarCampo("historia", e.target.value)
                   }
                   rows={6}
-                  className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
+                  className="w-full resize-y rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#36b970] focus:ring-2 focus:ring-[#36b970]/20"
                 />
               </div>
             </div>
           </section>
 
           {/* DIFERENCIAIS */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-bold text-[#173690]">
               Diferenciais
             </h2>
@@ -379,39 +483,31 @@ export default function AdminOPosto() {
               <Campo
                 label="Diferencial 1"
                 value={formulario.diferencial1}
-                onChange={(valor) =>
-                  alterarCampo("diferencial1", valor)
-                }
+                onChange={(valor) => alterarCampo("diferencial1", valor)}
               />
 
               <Campo
                 label="Diferencial 2"
                 value={formulario.diferencial2}
-                onChange={(valor) =>
-                  alterarCampo("diferencial2", valor)
-                }
+                onChange={(valor) => alterarCampo("diferencial2", valor)}
               />
 
               <Campo
                 label="Diferencial 3"
                 value={formulario.diferencial3}
-                onChange={(valor) =>
-                  alterarCampo("diferencial3", valor)
-                }
+                onChange={(valor) => alterarCampo("diferencial3", valor)}
               />
 
               <Campo
                 label="Diferencial 4"
                 value={formulario.diferencial4}
-                onChange={(valor) =>
-                  alterarCampo("diferencial4", valor)
-                }
+                onChange={(valor) => alterarCampo("diferencial4", valor)}
               />
             </div>
           </section>
 
           {/* ESTRUTURA */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-bold text-[#173690]">
               Estrutura
             </h2>
@@ -424,39 +520,31 @@ export default function AdminOPosto() {
               <Campo
                 label="Estrutura 1"
                 value={formulario.estrutura1}
-                onChange={(valor) =>
-                  alterarCampo("estrutura1", valor)
-                }
+                onChange={(valor) => alterarCampo("estrutura1", valor)}
               />
 
               <Campo
                 label="Estrutura 2"
                 value={formulario.estrutura2}
-                onChange={(valor) =>
-                  alterarCampo("estrutura2", valor)
-                }
+                onChange={(valor) => alterarCampo("estrutura2", valor)}
               />
 
               <Campo
                 label="Estrutura 3"
                 value={formulario.estrutura3}
-                onChange={(valor) =>
-                  alterarCampo("estrutura3", valor)
-                }
+                onChange={(valor) => alterarCampo("estrutura3", valor)}
               />
 
               <Campo
                 label="Estrutura 4"
                 value={formulario.estrutura4}
-                onChange={(valor) =>
-                  alterarCampo("estrutura4", valor)
-                }
+                onChange={(valor) => alterarCampo("estrutura4", valor)}
               />
             </div>
           </section>
 
           {/* LOGO */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-bold text-[#173690]">
               Logo do posto
             </h2>
@@ -486,9 +574,9 @@ export default function AdminOPosto() {
 
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
                 onChange={(e) =>
-                  setLogo(e.target.files?.[0] || null)
+                  selecionarLogo(e.target.files?.[0] || null)
                 }
                 className="block w-full rounded-xl border border-gray-300 p-3 text-sm"
               />
@@ -502,7 +590,7 @@ export default function AdminOPosto() {
           </section>
 
           {/* FAVICON */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
+          <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-xl font-bold text-[#173690]">
               Favicon
             </h2>
@@ -532,9 +620,9 @@ export default function AdminOPosto() {
 
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/svg+xml,image/x-icon"
                 onChange={(e) =>
-                  setFavicon(e.target.files?.[0] || null)
+                  selecionarFavicon(e.target.files?.[0] || null)
                 }
                 className="block w-full rounded-xl border border-gray-300 p-3 text-sm"
               />
@@ -581,7 +669,7 @@ export default function AdminOPosto() {
   );
 }
 
-/* COMPONENTE DE CAMPO */
+// COMPONENTE DE CAMPO
 function Campo({
   label,
   value,
