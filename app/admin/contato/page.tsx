@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -19,10 +19,7 @@ export default function AdminContatoPage() {
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
 
-  // =====================================================
   // CARREGAR DADOS DO SUPABASE
-  // =====================================================
-
   async function carregarContato() {
     setCarregando(true);
     setErro("");
@@ -56,10 +53,7 @@ export default function AdminContatoPage() {
     carregarContato();
   }, []);
 
-  // =====================================================
   // SALVAR DADOS
-  // =====================================================
-
   async function salvarContato(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -94,17 +88,12 @@ export default function AdminContatoPage() {
     }
 
     setMensagem("Informações de contato salvas com sucesso!");
-
     setSalvando(false);
 
     setTimeout(() => {
       setMensagem("");
     }, 5000);
   }
-
-  // =====================================================
-  // INTERFACE
-  // =====================================================
 
   return (
     <main className="min-h-screen bg-gray-100">
@@ -354,9 +343,8 @@ export default function AdminContatoPage() {
 
           <p className="mt-2 text-sm leading-6 text-gray-700">
             As informações cadastradas aqui são armazenadas no Supabase.
-            Quando a página pública estiver integrada, as alterações serão
-            exibidas automaticamente no site, sem necessidade de modificar
-            o código.
+            As alterações realizadas serão exibidas na página pública
+            de contato, sem necessidade de modificar o código do site.
           </p>
         </div>
       </section>
